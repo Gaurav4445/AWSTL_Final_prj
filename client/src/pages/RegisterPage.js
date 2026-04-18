@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Phone, Lock, AlertCircle, Home, MapPin } from 'lucide-react';
+import { User, Mail, Phone, Lock, Home, MapPin } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Label } from '../components/ui/FormElements';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import { toast } from 'sonner';
 
 const INDIAN_STATES = [
   'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
@@ -13,7 +19,6 @@ const INDIAN_STATES = [
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({ name:'', email:'', phone:'', password:'', confirmPassword:'', city:'', state:'' });
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -22,127 +27,227 @@ export const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    if (formData.password !== formData.confirmPassword) { setError('Passwords do not match'); return; }
-    if (formData.phone.replace(/\D/g,'').length < 10) { setError('Enter a valid 10-digit phone number'); return; }
+    if (formData.password !== formData.confirmPassword) { toast.error('Passwords do not match'); return; }
+    if (formData.phone.replace(/\D/g,'').length < 10) { toast.error('Enter a valid 10-digit phone number'); return; }
     setLoading(true);
     try {
       await register(formData.name, formData.email, formData.phone, formData.password);
+      toast.success('Account created successfully!');
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+      toast.error(err.response?.data?.error || 'Registration failed. Please try again.');
     } finally { setLoading(false); }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, x: -20 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.4 },
+    },
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
-
-        <div className="text-center mb-10">
-          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-xl">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-md"
+      >
+        {/* Logo */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-center mb-10"
+        >
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-2xl"
+          >
             <Home className="w-10 h-10 text-white" />
-          </div>
+          </motion.div>
           <h1 className="text-4xl font-bold text-gray-900">GharSeva</h1>
           <p className="text-gray-600 mt-2 text-base font-medium">Create your account</p>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-2xl shadow-2xl p-10 border border-gray-200">
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mb-6">
-              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-              <p className="text-red-700 text-sm font-semibold">{error}</p>
-            </div>
-          )}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Card className="shadow-2xl">
+            <CardHeader>
+              <CardTitle>Get Started</CardTitle>
+              <CardDescription>Join thousands managing their homes easily</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <motion.form
+                onSubmit={handleSubmit}
+                className="space-y-4"
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+              >
+                {/* Name */}
+                <motion.div variants={itemVariants}>
+                  <Label htmlFor="name">Full Name</Label>
+                  <div className="relative mt-2">
+                    <User className="absolute left-4 top-3 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="name"
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      placeholder="Rahul Sharma"
+                      className="pl-12"
+                    />
+                  </div>
+                </motion.div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
-              <div className="relative">
-                <User className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
-                <input type="text" name="name" value={formData.name} onChange={handleChange} required
-                  placeholder="Rahul Sharma"
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
-              </div>
-            </div>
+                {/* Email */}
+                <motion.div variants={itemVariants}>
+                  <Label htmlFor="email">Email Address</Label>
+                  <div className="relative mt-2">
+                    <Mail className="absolute left-4 top-3 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="email"
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      placeholder="rahul@example.com"
+                      className="pl-12"
+                    />
+                  </div>
+                </motion.div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
-                <input type="email" name="email" value={formData.email} onChange={handleChange} required
-                  placeholder="rahul@example.com"
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
-              </div>
-            </div>
+                {/* Phone */}
+                <motion.div variants={itemVariants}>
+                  <Label htmlFor="phone">Mobile Number</Label>
+                  <div className="relative flex mt-2">
+                    <span className="flex items-center px-4 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-gray-700 text-sm font-semibold">🇮🇳 +91</span>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      required
+                      placeholder="98765 43210"
+                      maxLength={10}
+                      className="rounded-l-none"
+                    />
+                  </div>
+                </motion.div>
 
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Mobile Number</label>
-              <div className="relative flex">
-                <span className="flex items-center px-4 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-gray-700 text-base font-semibold">🇮🇳 +91</span>
-                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required
-                  placeholder="98765 43210" maxLength={10}
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
-              </div>
-            </div>
+                {/* City + State */}
+                <motion.div variants={itemVariants} className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="city">City</Label>
+                    <div className="relative mt-2">
+                      <MapPin className="absolute left-4 top-3 w-5 h-5 text-gray-400" />
+                      <Input
+                        id="city"
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        placeholder="Mumbai"
+                        className="pl-12"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="state">State</Label>
+                    <select
+                      id="state"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white mt-2 transition-all"
+                    >
+                      <option value="">Select State</option>
+                      {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                </motion.div>
 
-            {/* City + State */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">City</label>
-                <div className="relative">
-                  <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
-                  <input type="text" name="city" value={formData.city} onChange={handleChange}
-                    placeholder="Mumbai"
-                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">State</label>
-                <select name="state" value={formData.state} onChange={handleChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base bg-white transition">
-                  <option value="">Select State</option>
-                  {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
-              </div>
-            </div>
+                {/* Password */}
+                <motion.div variants={itemVariants}>
+                  <Label htmlFor="password">Password</Label>
+                  <div className="relative mt-2">
+                    <Lock className="absolute left-4 top-3 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="password"
+                      type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      placeholder="Minimum 6 characters"
+                      className="pl-12"
+                    />
+                  </div>
+                </motion.div>
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
-                <input type="password" name="password" value={formData.password} onChange={handleChange} required
-                  placeholder="Minimum 6 characters"
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
-              </div>
-            </div>
+                {/* Confirm Password */}
+                <motion.div variants={itemVariants}>
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <div className="relative mt-2">
+                    <Lock className="absolute left-4 top-3 w-5 h-5 text-gray-400" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required
+                      placeholder="••••••••"
+                      className="pl-12"
+                    />
+                  </div>
+                </motion.div>
 
-            {/* Confirm Password */}
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-2">Confirm Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
-                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required
-                  placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
-              </div>
-            </div>
+                <motion.div variants={itemVariants} className="pt-2">
+                  <Button type="submit" disabled={loading} size="lg" className="w-full">
+                    {loading ? 'Creating Account...' : 'Create Account'}
+                  </Button>
+                </motion.div>
+              </motion.form>
 
-            <button type="submit" disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl disabled:opacity-60 mt-6 text-base">
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </button>
-          </form>
-
-          <p className="text-center text-base text-gray-600 mt-8">
-            Already have an account?{' '}
-            <Link to="/login" className="text-blue-600 font-bold hover:text-blue-700 transition">Login</Link>
-          </p>
-        </div>
-      </div>
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1 }}
+                className="text-center text-base text-gray-600 mt-8"
+              >
+                Already have an account?{' '}
+                <Link to="/login" className="text-blue-600 font-bold hover:text-blue-700 transition">
+                  Login
+                </Link>
+              </motion.p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
