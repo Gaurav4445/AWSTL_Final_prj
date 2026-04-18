@@ -1,22 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, AlertCircle, Trash2, Edit2, Phone, Star, Users } from 'lucide-react';
+import { Plus, Trash2, Edit2, Phone, MapPin, Star } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '../components/Navbar';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Label, Textarea, Select } from '../components/ui/FormElements';
+import { Skeleton } from '../components/ui/Skeleton';
+import { PageTransition } from '../components/Animations';
 import { vendorAPI } from '../services/api';
+import { toast } from 'sonner';
 
-const CATEGORIES = ['Plumber','Electrician','AC Mechanic','Carpenter','Painter','Pest Control','Cleaning Service','RO Technician','Inverter/Battery','Gas Agency','Security','General Handyman'];
-const EMPTY_FORM = { name:'', phone:'', altPhone:'', category:'Plumber', city:'', area:'', upiId:'', rating:'3', notes:'' };
-
-const categoryEmoji = { 'Plumber':'🔧','Electrician':'⚡','AC Mechanic':'❄️','Carpenter':'🪚','Painter':'🖌️','Pest Control':'🐛','Cleaning Service':'🧹','RO Technician':'💧','Inverter/Battery':'🔋','Gas Agency':'🔥','Security':'🔐','General Handyman':'🛠️' };
+const EMPTY_FORM = { name:'', specialization:'', phone:'', city:'', rating:5, notes:'' };
+const SPECIALIZATIONS = ['AC/Cooling','Water Systems','Electrical','Plumbing','Pest Control','General','Cleaning','Safety','Generator/Inverter','Gas/LPG','RO/Water Purifier','Security','Painting','Carpentry','Masonry'];
 
 export const VendorsPage = () => {
   const [vendors, setVendors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingVendor, setEditingVendor] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
-  const [filterCat, setFilterCat] = useState('all');
-  const [search, setSearch] = useState('');
 
   useEffect(() => { fetchVendors(); }, []);
 
@@ -24,230 +27,213 @@ export const VendorsPage = () => {
     try {
       setLoading(true);
       const res = await vendorAPI.getAll();
-      setVendors(res.data.data);
-    } catch { setError('Failed to load kaarigar list'); }
-    finally { setLoading(false); }
+      setVendors(res.data.data || []);
+    } catch {
+      toast.error('Failed to load vendors');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); setError('');
+    e.preventDefault();
+    if (!formData.name) { toast.error('Please enter vendor name'); return; }
     try {
-      if (editingVendor) await vendorAPI.update(editingVendor._id, { ...formData, rating: parseInt(formData.rating) });
-      else await vendorAPI.create({ ...formData, rating: parseInt(formData.rating) });
-      fetchVendors(); resetForm();
-    } catch (err) { setError(err.response?.data?.error || 'Failed to save'); }
+      if (editingVendor) await vendorAPI.update(editingVendor._id, formData);
+      else await vendorAPI.create(formData);
+      toast.success(editingVendor ? 'Vendor updated!' : 'Vendor added!');
+      fetchVendors();
+      resetForm();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Failed to save vendor');
+    }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Remove this kaarigar?')) return;
-    try { await vendorAPI.delete(id); fetchVendors(); }
-    catch { setError('Failed to delete'); }
+    if (!window.confirm('Delete this vendor?')) return;
+    try {
+      await vendorAPI.delete(id);
+      toast.success('Vendor deleted');
+      fetchVendors();
+    } catch {
+      toast.error('Failed to delete vendor');
+    }
   };
 
-  const handleEdit = (v) => {
-    setEditingVendor(v);
-    setFormData({ name:v.name, phone:v.phone, altPhone:v.altPhone||'', category:v.category, city:v.city||'', area:v.area||'', upiId:v.upiId||'', rating:String(v.rating||3), notes:v.notes||'' });
-    setShowForm(true); window.scrollTo({ top:0, behavior:'smooth' });
+  const handleEdit = (vendor) => {
+    setEditingVendor(vendor);
+    setFormData({ name: vendor.name, specialization: vendor.specialization || '', phone: vendor.phone || '', city: vendor.city || '', rating: vendor.rating || 5, notes: vendor.notes || '' });
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const resetForm = () => { setFormData(EMPTY_FORM); setEditingVendor(null); setShowForm(false); };
 
-  let filtered = vendors;
-  if (filterCat !== 'all') filtered = filtered.filter(v => v.category === filterCat);
-  if (search) filtered = filtered.filter(v => v.name.toLowerCase().includes(search.toLowerCase()) || v.area?.toLowerCase().includes(search.toLowerCase()));
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <PageTransition>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <Navbar />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10"
+          >
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">Vendors</h1>
+              <p className="text-gray-600 mt-2 text-base">Manage your trusted service providers</p>
+            </div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button size="lg" onClick={() => { resetForm(); setShowForm(!showForm); }} className="gap-2">
+                <Plus className="w-5 h-5" />
+                {showForm && !editingVendor ? 'Cancel' : 'Add Vendor'}
+              </Button>
+            </motion.div>
+          </motion.div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">Kaarigar Book</h1>
-            <p className="text-gray-500 mt-1 text-sm">Your trusted local service providers</p>
-          </div>
-          <button onClick={() => { resetForm(); setShowForm(!showForm); }}
-            className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-medium transition">
-            <Plus className="w-4 h-4" />
-            {showForm && !editingVendor ? 'Cancel' : 'Add Kaarigar'}
-          </button>
-        </div>
+          {/* Form */}
+          <AnimatePresence>
+            {showForm && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="mb-10"
+              >
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle>{editingVendor ? 'Edit Vendor' : 'Add New Vendor'}</CardTitle>
+                    <CardDescription>{editingVendor ? 'Update vendor information' : 'Add a new service provider'}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }}>
+                        <Label htmlFor="name">Vendor Name *</Label>
+                        <Input id="name" type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="e.g. ABC Plumbing" className="mt-2" />
+                      </motion.div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mb-6">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-            <p className="text-red-700 text-sm">{error}</p>
-          </div>
-        )}
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }}>
+                        <Label htmlFor="phone">Phone Number</Label>
+                        <Input id="phone" type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="9876543210" className="mt-2" />
+                      </motion.div>
 
-        {/* Form */}
-        {showForm && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-            <h2 className="text-base font-bold text-gray-800 mb-5">{editingVendor ? 'Edit Kaarigar' : 'Add New Kaarigar'}</h2>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
+                        <Label htmlFor="specialization">Specialization</Label>
+                        <Select id="specialization" name="specialization" value={formData.specialization} onChange={handleChange} className="mt-2">
+                          <option value="">Select Specialization</option>
+                          {SPECIALIZATIONS.map(s => <option key={s}>{s}</option>)}
+                        </Select>
+                      </motion.div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Name *</label>
-                <input type="text" name="name" value={formData.name} onChange={handleChange} required placeholder="Ramesh Kumar"
-                  className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-orange-400 text-sm" />
-              </div>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}>
+                        <Label htmlFor="city">City</Label>
+                        <Input id="city" type="text" name="city" value={formData.city} onChange={handleChange} placeholder="Mumbai" className="mt-2" />
+                      </motion.div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Mobile Number *</label>
-                <div className="flex">
-                  <span className="flex items-center px-3 border border-r-0 border-gray-200 rounded-l-xl bg-gray-50 text-gray-600 text-sm">🇮🇳 +91</span>
-                  <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required maxLength={10} placeholder="98765 43210"
-                    className="flex-1 border border-gray-200 px-4 py-2.5 rounded-r-xl focus:ring-2 focus:ring-orange-400 text-sm" />
-                </div>
-              </div>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}>
+                        <Label htmlFor="rating">Rating (1-5)</Label>
+                        <Input id="rating" type="number" name="rating" value={formData.rating} onChange={handleChange} min="1" max="5" className="mt-2" />
+                      </motion.div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Alternate Number</label>
-                <input type="tel" name="altPhone" value={formData.altPhone} onChange={handleChange} placeholder="Optional"
-                  className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-orange-400 text-sm" />
-              </div>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+                        <Label htmlFor="notes">Notes</Label>
+                        <Input id="notes" type="text" name="notes" value={formData.notes} onChange={handleChange} placeholder="Additional details..." className="mt-2" />
+                      </motion.div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Service Type *</label>
-                <select name="category" value={formData.category} onChange={handleChange} required
-                  className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-orange-400 text-sm bg-white">
-                  {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-                </select>
-              </div>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="sm:col-span-2 flex justify-end gap-3 pt-4">
+                        <Button type="button" variant="secondary" onClick={resetForm}>Cancel</Button>
+                        <Button type="submit">{editingVendor ? 'Update Vendor' : 'Add Vendor'}</Button>
+                      </motion.div>
+                    </form>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">City</label>
-                <input type="text" name="city" value={formData.city} onChange={handleChange} placeholder="Mumbai"
-                  className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-orange-400 text-sm" />
-              </div>
+          {/* Vendors Grid */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1,2,3].map(i => <Skeleton key={i} className="h-48 rounded-2xl" />)}
+            </div>
+          ) : vendors.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-2xl p-12 text-center border-2 border-dashed border-gray-300"
+            >
+              <p className="text-gray-700 font-semibold text-lg">No vendors yet</p>
+              <p className="text-gray-500 text-base mt-2 mb-6">Add your first vendor above</p>
+              <Button size="lg" onClick={() => setShowForm(true)} className="gap-2">
+                <Plus className="w-5 h-5" /> Add Vendor
+              </Button>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {vendors.map((vendor, idx) => (
+                <motion.div
+                  key={vendor._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1, duration: 0.4 }}
+                  viewport={{ once: true }}
+                >
+                  <Card className="h-full hover:shadow-lg transition-all">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">{vendor.name}</h3>
+                          {vendor.specialization && (
+                            <p className="text-sm text-blue-600 font-semibold mt-1">{vendor.specialization}</p>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => handleEdit(vendor)}>
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(vendor._id)}>
+                            <Trash2 className="w-4 h-4 text-red-600" />
+                          </Button>
+                        </div>
+                      </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Area / Locality</label>
-                <input type="text" name="area" value={formData.area} onChange={handleChange} placeholder="Andheri West, Koramangala..."
-                  className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-orange-400 text-sm" />
-              </div>
+                      {vendor.phone && (
+                        <div className="flex items-center gap-2 text-gray-600 text-sm mb-2">
+                          <Phone className="w-4 h-4" />
+                          <a href={`tel:${vendor.phone}`} className="hover:text-blue-600">{vendor.phone}</a>
+                        </div>
+                      )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">UPI ID</label>
-                <input type="text" name="upiId" value={formData.upiId} onChange={handleChange} placeholder="ramesh@upi"
-                  className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-orange-400 text-sm" />
-              </div>
+                      {vendor.city && (
+                        <div className="flex items-center gap-2 text-gray-600 text-sm mb-4">
+                          <MapPin className="w-4 h-4" />
+                          {vendor.city}
+                        </div>
+                      )}
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Your Rating</label>
-                <select name="rating" value={formData.rating} onChange={handleChange}
-                  className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-orange-400 text-sm bg-white">
-                  <option value="5">⭐⭐⭐⭐⭐ Excellent</option>
-                  <option value="4">⭐⭐⭐⭐ Good</option>
-                  <option value="3">⭐⭐⭐ Average</option>
-                  <option value="2">⭐⭐ Below Average</option>
-                  <option value="1">⭐ Poor</option>
-                </select>
-              </div>
+                      {vendor.rating && (
+                        <div className="flex items-center gap-2 mb-4">
+                          {[...Array(vendor.rating)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          ))}
+                          <span className="text-sm text-gray-600 ml-2">{vendor.rating}/5</span>
+                        </div>
+                      )}
 
-              <div className="sm:col-span-2">
-                <label className="block text-sm font-semibold text-gray-600 mb-1.5">Notes</label>
-                <input type="text" name="notes" value={formData.notes} onChange={handleChange}
-                  placeholder="Reliable, comes on time, charges fairly..."
-                  className="w-full border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-orange-400 text-sm" />
-              </div>
-
-              <div className="sm:col-span-2 flex justify-end gap-3 pt-2">
-                <button type="button" onClick={resetForm}
-                  className="px-5 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition">Cancel</button>
-                <button type="submit"
-                  className="px-6 py-2.5 bg-orange-600 hover:bg-orange-700 text-white rounded-xl text-sm font-medium transition">
-                  {editingVendor ? 'Update' : 'Save Kaarigar'}
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* Search + Filter */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
-          <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Search by name or area..."
-            className="flex-1 border border-gray-200 px-4 py-2.5 rounded-xl focus:ring-2 focus:ring-orange-400 text-sm bg-white" />
-          <select value={filterCat} onChange={e => setFilterCat(e.target.value)}
-            className="border border-gray-200 px-4 py-2.5 rounded-xl text-sm bg-white focus:ring-2 focus:ring-orange-400">
-            <option value="all">All Categories</option>
-            {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-          </select>
-        </div>
-
-        {/* Vendor Cards */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[1,2,3].map(i => <div key={i} className="bg-white rounded-xl h-40 animate-pulse border border-gray-100" />)}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-dashed border-gray-200">
-            <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-500 font-medium">No kaarigar saved yet</p>
-            <p className="text-gray-400 text-sm mt-1">Add your trusted plumbers, electricians, and service providers</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filtered.map(v => (
-              <div key={v._id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 bg-orange-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                      {categoryEmoji[v.category] || '🛠️'}
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-gray-800 text-sm">{v.name}</h3>
-                      <p className="text-xs text-orange-600 font-medium">{v.category}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <button onClick={() => handleEdit(v)} className="p-1.5 hover:bg-blue-50 rounded-lg transition">
-                      <Edit2 className="w-3.5 h-3.5 text-blue-500" />
-                    </button>
-                    <button onClick={() => handleDelete(v._id)} className="p-1.5 hover:bg-red-50 rounded-lg transition">
-                      <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Rating */}
-                <div className="flex items-center gap-0.5 mb-3">
-                  {[1,2,3,4,5].map(s => (
-                    <Star key={s} className={`w-3.5 h-3.5 ${s <= v.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'}`} />
-                  ))}
-                  <span className="text-xs text-gray-400 ml-1">{v.rating}/5</span>
-                </div>
-
-                {/* Contact */}
-                <div className="space-y-1.5 mb-3">
-                  <a href={`tel:+91${v.phone}`} className="flex items-center gap-2 text-sm text-gray-700 hover:text-orange-600 transition">
-                    <Phone className="w-3.5 h-3.5 text-gray-400" />
-                    +91 {v.phone}
-                  </a>
-                  {v.altPhone && (
-                    <a href={`tel:+91${v.altPhone}`} className="flex items-center gap-2 text-xs text-gray-500 hover:text-orange-600 transition">
-                      <Phone className="w-3 h-3 text-gray-300" />
-                      +91 {v.altPhone}
-                    </a>
-                  )}
-                </div>
-
-                {/* Location + UPI */}
-                <div className="flex flex-wrap gap-2 text-xs">
-                  {v.area && <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded-lg">📍 {v.area}</span>}
-                  {v.city && !v.area && <span className="bg-gray-50 text-gray-600 px-2 py-1 rounded-lg">📍 {v.city}</span>}
-                  {v.upiId && <span className="bg-blue-50 text-blue-600 px-2 py-1 rounded-lg">📱 {v.upiId}</span>}
-                </div>
-
-                {v.notes && <p className="text-xs text-gray-400 mt-2 italic">"{v.notes}"</p>}
-              </div>
-            ))}
-          </div>
-        )}
-      </main>
-    </div>
+                      {vendor.notes && (
+                        <p className="text-sm text-gray-600 border-t border-gray-100 pt-4">{vendor.notes}</p>
+                      )}
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
+    </PageTransition>
   );
 };

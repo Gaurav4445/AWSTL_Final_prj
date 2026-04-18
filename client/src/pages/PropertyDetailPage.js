@@ -1,8 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, AlertCircle, Plus, Home, Calendar, Droplet, Zap, MapPin, IndianRupee } from 'lucide-react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowLeft, MapPin, Trash2, Plus, Home, Zap, Droplets, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
 import { Navbar } from '../components/Navbar';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
+import { Button } from '../components/ui/Button';
+import { Skeleton } from '../components/ui/Skeleton';
+import { PageTransition, StatsCard, AnimatedList } from '../components/Animations';
 import { propertyAPI, recordAPI, taskAPI } from '../services/api';
+import { toast } from 'sonner';
+
+const CATEGORY_COLORS = {
+  'AC/Cooling': '#3b82f6',
+  'Water Systems': '#06b6d4',
+  'Electrical': '#eab308',
+  'Plumbing': '#8b5cf6',
+  'Pest Control': '#ef4444',
+  'General': '#6b7280',
+  'Cleaning': '#22c55e',
+  'Safety': '#f97316',
+  'Generator/Inverter': '#6366f1',
+  'Gas/LPG': '#f43f5e',
+  'RO/Water Purifier': '#14b8a6',
+  'Security': '#64748b',
+};
+
+const PRIORITY_COLORS = {
+  'Low': '#22c55e',
+  'Medium': '#eab308',
+  'High': '#ef4444',
+  'Urgent': '#dc2626',
+};
 
 export const PropertyDetailPage = () => {
   const { id } = useParams();
@@ -11,244 +39,362 @@ export const PropertyDetailPage = () => {
   const [records, setRecords] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   useEffect(() => { fetchData(); }, [id]);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [propRes, recRes, taskRes] = await Promise.all([
+      const [propRes, recordsRes, tasksRes] = await Promise.all([
         propertyAPI.getById(id),
         recordAPI.getByProperty(id),
         taskAPI.getByProperty(id),
       ]);
       setProperty(propRes.data.data);
-      setRecords(recRes.data.data || []);
-      setTasks(taskRes.data.data || []);
+      setRecords(recordsRes.data.data || []);
+      setTasks(tasksRes.data.data || []);
     } catch (err) {
-      setError('Failed to load property details');
-    } finally {
-      setLoading(false);
-    }
+      toast.error('Failed to load property details');
+      navigate('/properties');
+    } finally { setLoading(false); }
   };
 
   const handleDelete = async () => {
     if (!window.confirm('Delete this property and all its data?')) return;
     try {
       await propertyAPI.delete(id);
+      toast.success('Property deleted');
       navigate('/properties');
     } catch {
-      setError('Failed to delete property');
+      toast.error('Failed to delete property');
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <Navbar />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <button onClick={() => navigate('/properties')} className="flex items-center gap-2 text-gray-700 hover:text-gray-900 mb-8 font-semibold">
-            <ArrowLeft className="w-5 h-5" /> Back to Properties
-          </button>
-          <div className="bg-white rounded-2xl p-12 animate-pulse border border-gray-200" />
-        </main>
-      </div>
-    );
-  }
-
-  if (!property) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <Navbar />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <button onClick={() => navigate('/properties')} className="flex items-center gap-2 text-gray-700 hover:text-gray-900 mb-8 font-semibold">
-            <ArrowLeft className="w-5 h-5" /> Back to Properties
-          </button>
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-            <p className="text-red-700 font-semibold">Property not found</p>
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  const totalSpent = records.reduce((sum, r) => sum + (r.actualCost || 0), 0);
-  const typeColors = {
-    'Apartment': 'bg-blue-100 text-blue-800',
-    'Independent House': 'bg-green-100 text-green-800',
-    'Villa': 'bg-purple-100 text-purple-800',
-    'Studio': 'bg-yellow-100 text-yellow-800',
-    'Row House': 'bg-pink-100 text-pink-800',
-    'Builder Floor': 'bg-orange-100 text-orange-800',
-    'Bungalow': 'bg-teal-100 text-teal-800',
+  const handleDeleteRecord = async (recordId) => {
+    if (!window.confirm('Delete this maintenance record?')) return;
+    try {
+      await recordAPI.delete(recordId);
+      toast.success('Record deleted');
+      setRecords(records.filter(r => r._id !== recordId));
+    } catch {
+      toast.error('Failed to delete record');
+    }
   };
 
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Delete this task?')) return;
+    try {
+      await taskAPI.delete(taskId);
+      toast.success('Task deleted');
+      setTasks(tasks.filter(t => t._id !== taskId));
+    } catch {
+      toast.error('Failed to delete task');
+    }
+  };
+
+  const totalSpent = records.reduce((sum, r) => sum + (r.cost || 0), 0);
+  const activeTasks = tasks.filter(t => t.status !== 'Completed').length;
+  const completedTasks = tasks.filter(t => t.status === 'Completed').length;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Back button */}
-        <button onClick={() => navigate('/properties')} className="flex items-center gap-2 text-gray-700 hover:text-gray-900 mb-8 font-semibold transition">
-          <ArrowLeft className="w-5 h-5" /> Back to Properties
-        </button>
+    <PageTransition>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <Navbar />
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          {/* Back Button */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="mb-8"
+          >
+            <button
+              onClick={() => navigate('/properties')}
+              className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" /> Back to Properties
+            </button>
+          </motion.div>
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mb-8">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-            <p className="text-red-700 text-sm font-semibold">{error}</p>
-          </div>
-        )}
-
-        {/* Header */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8 mb-8">
-          <div className="flex items-start justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <Home className="w-7 h-7 text-blue-600" />
-                </div>
-                <h1 className="text-4xl font-bold text-gray-900">{property.name}</h1>
+          {loading ? (
+            <div className="space-y-6">
+              <Skeleton className="h-48 rounded-2xl" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {[1, 2, 3].map(i => <Skeleton key={i} className="h-32 rounded-xl" />)}
               </div>
-              <p className="text-gray-600 flex items-center gap-2 text-base font-medium">
-                <MapPin className="w-5 h-5" />
-                {property.address}, {property.city}{property.state ? `, ${property.state}` : ''}
-              </p>
             </div>
-            <Link to={`/properties`} className="text-blue-600 text-sm font-bold hover:text-blue-700 transition">Edit Property →</Link>
-          </div>
-
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-6 pb-6 border-b border-gray-200">
-            <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${typeColors[property.propertyType] || 'bg-gray-100 text-gray-700'}`}>
-              {property.propertyType}
-            </span>
-            {property.bhkType && (
-              <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-blue-100 text-blue-800">
-                {property.bhkType}
-              </span>
-            )}
-            {property.societyName && (
-              <span className="text-xs font-bold px-3 py-1.5 rounded-full bg-gray-100 text-gray-700">
-                {property.societyName}
-              </span>
-            )}
-          </div>
-
-          {/* Details Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {property.squareFeet && (
-              <div>
-                <p className="text-gray-500 text-xs font-bold mb-2 uppercase tracking-wide">Area</p>
-                <p className="text-2xl font-bold text-gray-900">{property.squareFeet} sq ft</p>
-              </div>
-            )}
-            {property.floorNumber && (
-              <div>
-                <p className="text-gray-500 text-xs font-bold mb-2 uppercase tracking-wide">Floor</p>
-                <p className="text-2xl font-bold text-gray-900">Floor {property.floorNumber}</p>
-              </div>
-            )}
-            {property.pincode && (
-              <div>
-                <p className="text-gray-500 text-xs font-bold mb-2 uppercase tracking-wide">Pincode</p>
-                <p className="text-2xl font-bold text-gray-900">{property.pincode}</p>
-              </div>
-            )}
-            {property.description && (
-              <div className="sm:col-span-2 lg:col-span-4">
-                <p className="text-gray-500 text-xs font-bold mb-2 uppercase tracking-wide">Description</p>
-                <p className="text-gray-700 text-base">{property.description}</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-blue-200 hover:shadow-xl transition">
-            <p className="text-gray-600 text-sm font-bold mb-2">Total Maintenance Records</p>
-            <p className="text-4xl font-bold text-gray-900">{records.length}</p>
-          </div>
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-green-200 hover:shadow-xl transition">
-            <p className="text-gray-600 text-sm font-bold mb-2">Total Spent</p>
-            <p className="text-4xl font-bold text-gray-900">₹{totalSpent.toLocaleString('en-IN')}</p>
-          </div>
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-200 hover:shadow-xl transition">
-            <p className="text-gray-600 text-sm font-bold mb-2">Active Tasks</p>
-            <p className="text-4xl font-bold text-gray-900">{tasks.filter(t => !t.completed).length}</p>
-          </div>
-        </div>
-
-        {/* Maintenance Records */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Maintenance History</h2>
-            <Link to="/history" className="text-blue-600 text-sm font-bold hover:text-blue-700 transition">Add Record →</Link>
-          </div>
-          {records.length === 0 ? (
-            <p className="text-gray-500 text-base">No maintenance records yet</p>
+          ) : !property ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-2xl p-16 text-center shadow-sm border border-gray-200"
+            >
+              <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-700 font-semibold text-lg">Property not found</p>
+            </motion.div>
           ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {records.slice(0, 10).map(record => (
-                <div key={record._id} className="flex items-start justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-gray-200 hover:border-blue-200 transition">
-                  <div className="flex-1">
-                    <p className="font-bold text-gray-900 text-base">{record.category}</p>
-                    <p className="text-sm text-gray-600 mt-1">{new Date(record.serviceDate).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    {record.description && <p className="text-sm text-gray-700 mt-2">{record.description}</p>}
+            <div className="space-y-8">
+              {/* Property Header */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+              >
+                <Card className="shadow-lg overflow-hidden border-0 bg-gradient-to-br from-white to-blue-50">
+                  <CardContent className="p-8">
+                    <div className="flex justify-between items-start gap-6 flex-wrap">
+                      <div className="flex-1">
+                        <h1 className="text-4xl font-bold text-gray-900 mb-2">{property.name}</h1>
+                        <div className="flex items-center gap-2 text-gray-600 text-base mb-4">
+                          <MapPin className="w-5 h-5 text-blue-600" />
+                          {property.address}, {property.city}
+                          {property.state && `, ${property.state}`}
+                        </div>
+                        <div className="flex flex-wrap gap-3">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">
+                            {property.propertyType}
+                          </span>
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-indigo-100 text-indigo-700">
+                            {property.bhkType}
+                          </span>
+                          {property.societyName && (
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-purple-100 text-purple-700">
+                              {property.societyName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                        <Button
+                          variant="destructive"
+                          onClick={handleDelete}
+                          className="gap-2"
+                        >
+                          <Trash2 className="w-4 h-4" /> Delete Property
+                        </Button>
+                      </motion.div>
+                    </div>
+
+                    {/* Property Details Grid */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 mt-8 pt-8 border-t border-gray-200">
+                      {property.squareFeet && (
+                        <div>
+                          <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Area</p>
+                          <p className="text-2xl font-bold text-gray-900 mt-1">{property.squareFeet} sqft</p>
+                        </div>
+                      )}
+                      {property.floorNumber && (
+                        <div>
+                          <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Floor</p>
+                          <p className="text-2xl font-bold text-gray-900 mt-1">Floor {property.floorNumber}</p>
+                        </div>
+                      )}
+                      {property.pincode && (
+                        <div>
+                          <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Pincode</p>
+                          <p className="text-2xl font-bold text-gray-900 mt-1">{property.pincode}</p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-sm text-gray-600 font-semibold uppercase tracking-wide">Records</p>
+                        <p className="text-2xl font-bold text-gray-900 mt-1">{records.length}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Stats Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <StatsCard
+                  icon={Home}
+                  title="Total Records"
+                  value={records.length}
+                  delay={0}
+                />
+                <StatsCard
+                  icon={Zap}
+                  title="Total Spent"
+                  value={`₹${totalSpent.toLocaleString()}`}
+                  delay={0.1}
+                />
+                <StatsCard
+                  icon={Clock}
+                  title="Active Tasks"
+                  value={activeTasks}
+                  delay={0.2}
+                />
+              </div>
+
+              {/* Maintenance History */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Maintenance History</h2>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/history?property=${id}`)}
+                      className="gap-2"
+                    >
+                      <Plus className="w-4 h-4" /> Add Record
+                    </Button>
+                  </motion.div>
+                </div>
+
+                {records.length === 0 ? (
+                  <Card className="shadow-sm border-dashed border-2">
+                    <CardContent className="p-12 text-center">
+                      <p className="text-gray-600 font-medium">No maintenance records yet</p>
+                      <p className="text-gray-500 text-sm mt-1">Start tracking maintenance by adding a record</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-3">
+                    {records.map((record, idx) => (
+                      <motion.div
+                        key={record._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05, duration: 0.3 }}
+                        viewport={{ once: true }}
+                      >
+                        <Card className="shadow-sm hover:shadow-md transition-shadow">
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between gap-4 flex-wrap">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <h3 className="font-semibold text-gray-900">{record.category}</h3>
+                                  <span
+                                    className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold text-white"
+                                    style={{ backgroundColor: CATEGORY_COLORS[record.category] || '#6b7280' }}
+                                  >
+                                    ₹{record.cost}
+                                  </span>
+                                </div>
+                                <p className="text-gray-600 text-sm">{record.description}</p>
+                                <p className="text-gray-500 text-xs mt-2">
+                                  {new Date(record.date).toLocaleDateString('en-IN')}
+                                </p>
+                              </div>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => handleDeleteRecord(record._id)}
+                                className="text-red-500 hover:text-red-700 transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </motion.button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
                   </div>
-                  <p className="font-bold text-blue-600 text-lg whitespace-nowrap ml-4">₹{record.actualCost?.toLocaleString('en-IN')}</p>
+                )}
+              </motion.div>
+
+              {/* Tasks Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                viewport={{ once: true }}
+              >
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Tasks</h2>
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/tasks?property=${id}`)}
+                      className="gap-2"
+                    >
+                      <Plus className="w-4 h-4" /> Add Task
+                    </Button>
+                  </motion.div>
                 </div>
-              ))}
-              {records.length > 10 && (
-                <p className="text-sm text-gray-600 text-center pt-4 font-semibold">+{records.length - 10} more records</p>
-              )}
+
+                {tasks.length === 0 ? (
+                  <Card className="shadow-sm border-dashed border-2">
+                    <CardContent className="p-12 text-center">
+                      <p className="text-gray-600 font-medium">No tasks yet</p>
+                      <p className="text-gray-500 text-sm mt-1">Create tasks to organize your maintenance work</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="space-y-3">
+                    {tasks.map((task, idx) => (
+                      <motion.div
+                        key={task._id}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.05, duration: 0.3 }}
+                        viewport={{ once: true }}
+                      >
+                        <Card
+                          className={`shadow-sm hover:shadow-md transition-all ${
+                            task.status === 'Completed' ? 'opacity-75 bg-gray-50' : ''
+                          }`}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-start justify-between gap-4 flex-wrap">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-3 mb-2 flex-wrap">
+                                  {task.status === 'Completed' && (
+                                    <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
+                                  )}
+                                  <h3 className={`font-semibold ${task.status === 'Completed' ? 'line-through text-gray-600' : 'text-gray-900'}`}>
+                                    {task.title}
+                                  </h3>
+                                  <span
+                                    className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold text-white flex-shrink-0"
+                                    style={{ backgroundColor: PRIORITY_COLORS[task.priority] || '#6b7280' }}
+                                  >
+                                    {task.priority}
+                                  </span>
+                                </div>
+                                {task.description && (
+                                  <p className="text-gray-600 text-sm mb-2">{task.description}</p>
+                                )}
+                                <div className="flex items-center gap-4 text-xs text-gray-500">
+                                  {task.dueDate && (
+                                    <span>Due: {new Date(task.dueDate).toLocaleDateString('en-IN')}</span>
+                                  )}
+                                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                    task.status === 'Completed'
+                                      ? 'bg-green-100 text-green-700'
+                                      : task.status === 'In Progress'
+                                      ? 'bg-blue-100 text-blue-700'
+                                      : 'bg-yellow-100 text-yellow-700'
+                                  }`}>
+                                    {task.status}
+                                  </span>
+                                </div>
+                              </div>
+                              <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={() => handleDeleteTask(task._id)}
+                                className="text-red-500 hover:text-red-700 transition-colors flex-shrink-0"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </motion.button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
             </div>
           )}
-        </div>
-
-        {/* Tasks */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Tasks</h2>
-            <Link to="/tasks" className="text-blue-600 text-sm font-bold hover:text-blue-700 transition">Manage Tasks →</Link>
-          </div>
-          {tasks.length === 0 ? (
-            <p className="text-gray-500 text-base">No tasks for this property</p>
-          ) : (
-            <div className="space-y-2">
-              {tasks.slice(0, 5).map(task => (
-                <div key={task._id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition border border-gray-200">
-                  <input type="checkbox" defaultChecked={task.completed} disabled className="w-5 h-5 rounded" />
-                  <span className={`text-base flex-1 ${task.completed ? 'line-through text-gray-400' : 'text-gray-800 font-medium'}`}>
-                    {task.title}
-                  </span>
-                  {task.priority && (
-                    <span className={`text-xs px-3 py-1 rounded-full font-bold ${
-                      task.priority === 'High' ? 'bg-red-100 text-red-700' :
-                      task.priority === 'Medium' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
-                    }`}>
-                      {task.priority}
-                    </span>
-                  )}
-                </div>
-              ))}
-              {tasks.length > 5 && (
-                <p className="text-sm text-gray-600 text-center pt-4 font-semibold">+{tasks.length - 5} more tasks</p>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Delete Button */}
-        <div className="flex justify-end">
-          <button onClick={handleDelete} className="px-8 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-bold transition shadow-lg hover:shadow-xl">
-            Delete Property
-          </button>
-        </div>
-      </main>
-    </div>
+        </main>
+      </div>
+    </PageTransition>
   );
 };
