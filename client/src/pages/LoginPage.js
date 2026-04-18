@@ -24,48 +24,48 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
 
         {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Home className="w-8 h-8 text-white" />
+        <div className="text-center mb-10">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-xl">
+            <Home className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800">GharSeva</h1>
-          <p className="text-gray-500 mt-1">Your home maintenance companion</p>
+          <h1 className="text-4xl font-bold text-gray-900">GharSeva</h1>
+          <p className="text-gray-600 mt-2 text-base font-medium">Your home maintenance companion</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <h2 className="text-xl font-bold text-gray-800 mb-6">Welcome back</h2>
+        <div className="bg-white rounded-2xl shadow-2xl p-10 border border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">Welcome back</h2>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mb-5">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mb-6">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-              <p className="text-red-700 text-sm">{error}</p>
+              <p className="text-red-700 text-sm font-semibold">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-3.5 w-4.5 h-4.5 text-gray-400 w-4 h-4" />
+                <Mail className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
                 <input
                   type="email" name="email" value={formData.email} onChange={handleChange} required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent text-sm transition"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition"
                   placeholder="you@example.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
+                <Lock className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
                 <input
                   type="password" name="password" value={formData.password} onChange={handleChange} required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent text-sm transition"
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition"
                   placeholder="••••••••"
                 />
               </div>
@@ -73,15 +73,15 @@ export const LoginPage = () => {
 
             <button
               type="submit" disabled={loading}
-              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition shadow-md disabled:opacity-60 mt-2"
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl disabled:opacity-60 mt-4 text-base"
             >
               {loading ? 'Logging in...' : 'Login'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-5">
+          <p className="text-center text-base text-gray-600 mt-8">
             Don't have an account?{' '}
-            <Link to="/register" className="text-orange-600 font-semibold hover:underline">Create one</Link>
+            <Link to="/register" className="text-blue-600 font-bold hover:text-blue-700 transition">Create one</Link>
           </p>
         </div>
       </div>

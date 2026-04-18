@@ -62,102 +62,102 @@ export const DashboardPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12">
           <div>
-            <p className="text-orange-600 font-medium text-sm">{greeting()}, {user?.name?.split(' ')[0]} 🙏</p>
-            <h1 className="text-3xl font-bold text-gray-800 mt-0.5">Dashboard</h1>
-            <p className="text-gray-500 mt-1 text-sm">Here's your home maintenance overview</p>
+            <p className="text-blue-600 font-semibold text-base">{greeting()}, {user?.name?.split(' ')[0]} 👋</p>
+            <h1 className="text-4xl font-bold text-gray-900 mt-2">Dashboard</h1>
+            <p className="text-gray-600 mt-2 text-base">Track your home maintenance at a glance</p>
           </div>
           <Link to="/properties"
-            className="inline-flex items-center gap-2 bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-medium transition shadow-sm">
-            <Plus className="w-4 h-4" /> Add Property
+            className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl font-semibold transition shadow-lg hover:shadow-xl transform hover:scale-105">
+            <Plus className="w-5 h-5" /> Add Property
           </Link>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mb-6">
-            <AlertCircle className="w-5 h-5 text-red-500" />
+          <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mb-8">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
             <p className="text-red-700 text-sm">{error}</p>
           </div>
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm text-gray-500 font-medium">Total Records</p>
-              <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-orange-600" />
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-blue-100 hover:shadow-xl transition">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-gray-600 text-sm font-semibold">Total Records</p>
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-blue-600" />
               </div>
             </div>
-            <p className="text-4xl font-bold text-gray-800">{stats.totalRecords}</p>
-            <p className="text-xs text-gray-400 mt-1">All time maintenance logs</p>
+            <p className="text-4xl font-bold text-gray-900">{stats.totalRecords}</p>
+            <p className="text-xs text-gray-500 mt-2">All time maintenance logs</p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm text-gray-500 font-medium">This Month</p>
-              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-blue-600" />
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-purple-100 hover:shadow-xl transition">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-gray-600 text-sm font-semibold">This Month</p>
+              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-purple-600" />
               </div>
             </div>
-            <p className="text-4xl font-bold text-gray-800">{stats.monthlyRecords}</p>
-            <p className="text-xs text-gray-400 mt-1">Services done this month</p>
+            <p className="text-4xl font-bold text-gray-900">{stats.monthlyRecords}</p>
+            <p className="text-xs text-gray-500 mt-2">Services done this month</p>
           </div>
 
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm text-gray-500 font-medium">Total Spent</p>
-              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                <IndianRupee className="w-5 h-5 text-green-600" />
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-green-100 hover:shadow-xl transition">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-gray-600 text-sm font-semibold">Total Spent</p>
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                <IndianRupee className="w-6 h-6 text-green-600" />
               </div>
             </div>
-            <p className="text-4xl font-bold text-gray-800">₹{(stats.totalSpent || 0).toLocaleString('en-IN')}</p>
-            <p className="text-xs text-gray-400 mt-1">Overall maintenance spend</p>
+            <p className="text-4xl font-bold text-gray-900">₹{(stats.totalSpent || 0).toLocaleString('en-IN')}</p>
+            <p className="text-xs text-gray-500 mt-2">Overall maintenance spend</p>
           </div>
         </div>
 
         {/* Charts */}
         {chartData.length > 0 && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
             {/* Monthly Spend Bar Chart */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-base font-bold text-gray-700 mb-4 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-orange-500" />
+            <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition">
+              <h3 className="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
                 Monthly Spend (₹)
               </h3>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `₹${v >= 1000 ? (v/1000).toFixed(0)+'k' : v}`} />
-                  <Tooltip formatter={(val) => [`₹${val.toLocaleString('en-IN')}`, 'Spent']} />
-                  <Bar dataKey="spent" fill="#f97316" radius={[4,4,0,0]} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6b7280' }} />
+                  <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} tickFormatter={(v) => `₹${v >= 1000 ? (v/1000).toFixed(0)+'k' : v}`} />
+                  <Tooltip formatter={(val) => [`₹${val.toLocaleString('en-IN')}`, 'Spent']} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
+                  <Bar dataKey="spent" fill="#2563eb" radius={[6,6,0,0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
 
             {/* Category Pie */}
             {pieData.length > 0 && (
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <h3 className="text-base font-bold text-gray-700 mb-4 flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-orange-500" />
+              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition">
+                <h3 className="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-blue-600" />
                   Spend by Category
                 </h3>
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
                     <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
                       {pieData.map((entry, i) => (
                         <Cell key={i} fill={CATEGORY_COLORS[entry.name] || '#6b7280'} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(val) => `₹${val.toLocaleString('en-IN')}`} />
-                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '11px' }} />
+                    <Tooltip formatter={(val) => `₹${val.toLocaleString('en-IN')}`} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
+                    <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -167,27 +167,27 @@ export const DashboardPage = () => {
 
         {/* Properties */}
         <div>
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="text-xl font-bold text-gray-800">Your Properties</h2>
-            <Link to="/properties" className="text-orange-600 text-sm font-medium hover:underline">View all →</Link>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Your Properties</h2>
+            <Link to="/properties" className="text-blue-600 text-sm font-semibold hover:text-blue-700 transition">View all →</Link>
           </div>
           {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {[1,2,3].map(i => <div key={i} className="bg-white rounded-xl h-52 animate-pulse border border-gray-100" />)}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1,2,3].map(i => <div key={i} className="bg-white rounded-2xl h-64 animate-pulse border border-gray-100" />)}
             </div>
           ) : properties.length === 0 ? (
-            <div className="bg-white rounded-2xl p-12 text-center border border-dashed border-gray-200">
-              <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Plus className="w-8 h-8 text-orange-500" />
+            <div className="bg-white rounded-2xl p-16 text-center border-2 border-dashed border-gray-300">
+              <div className="w-20 h-20 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Plus className="w-10 h-10 text-blue-600" />
               </div>
-              <p className="text-gray-600 font-medium">No properties yet</p>
-              <p className="text-gray-400 text-sm mt-1 mb-4">Add your home or flat to get started</p>
-              <Link to="/properties" className="inline-flex items-center gap-2 bg-orange-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-orange-700 transition">
-                <Plus className="w-4 h-4" /> Add Property
+              <p className="text-gray-700 font-semibold text-lg">No properties yet</p>
+              <p className="text-gray-500 text-base mt-2 mb-6">Add your home or flat to get started</p>
+              <Link to="/properties" className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl text-base font-semibold hover:from-blue-700 hover:to-blue-800 transition">
+                <Plus className="w-5 h-5" /> Add Property
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {properties.map(prop => (
                 <PropertyCard key={prop._id} property={prop} onDelete={() => {}} onEdit={() => {}} />
               ))}

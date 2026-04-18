@@ -35,74 +35,74 @@ export const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 flex items-center justify-center px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
 
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Home className="w-8 h-8 text-white" />
+        <div className="text-center mb-10">
+          <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-xl">
+            <Home className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-800">GharSeva</h1>
-          <p className="text-gray-500 mt-1">Create your account</p>
+          <h1 className="text-4xl font-bold text-gray-900">GharSeva</h1>
+          <p className="text-gray-600 mt-2 text-base font-medium">Create your account</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-2xl p-10 border border-gray-200">
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mb-5">
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3 mb-6">
               <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-              <p className="text-red-700 text-sm">{error}</p>
+              <p className="text-red-700 text-sm font-semibold">{error}</p>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Full Name</label>
               <div className="relative">
-                <User className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
+                <User className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
                 <input type="text" name="name" value={formData.name} onChange={handleChange} required
                   placeholder="Rahul Sharma"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent text-sm" />
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
               </div>
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
               <div className="relative">
-                <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
+                <Mail className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
                 <input type="email" name="email" value={formData.email} onChange={handleChange} required
                   placeholder="rahul@example.com"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent text-sm" />
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
               </div>
             </div>
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mobile Number</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Mobile Number</label>
               <div className="relative flex">
-                <span className="flex items-center px-3 border border-r-0 border-gray-200 rounded-l-xl bg-gray-50 text-gray-600 text-sm font-medium">🇮🇳 +91</span>
+                <span className="flex items-center px-4 border border-r-0 border-gray-300 rounded-l-lg bg-gray-50 text-gray-700 text-base font-semibold">🇮🇳 +91</span>
                 <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required
                   placeholder="98765 43210" maxLength={10}
-                  className="flex-1 px-4 py-3 border border-gray-200 rounded-r-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent text-sm" />
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
               </div>
             </div>
 
             {/* City + State */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">City</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">City</label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                  <MapPin className="absolute left-4 top-3.5 w-5 h-5 text-gray-400" />
                   <input type="text" name="city" value={formData.city} onChange={handleChange}
                     placeholder="Mumbai"
-                    className="w-full pl-9 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent text-sm" />
+                    className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">State</label>
+                <label className="block text-sm font-bold text-gray-700 mb-2">State</label>
                 <select name="state" value={formData.state} onChange={handleChange}
-                  className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent text-sm bg-white">
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base bg-white transition">
                   <option value="">Select State</option>
                   {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
@@ -111,35 +111,35 @@ export const RegisterPage = () => {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
+                <Lock className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
                 <input type="password" name="password" value={formData.password} onChange={handleChange} required
                   placeholder="Minimum 6 characters"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent text-sm" />
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
               </div>
             </div>
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Confirm Password</label>
+              <label className="block text-sm font-bold text-gray-700 mb-2">Confirm Password</label>
               <div className="relative">
-                <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400" />
+                <Lock className="absolute left-4 top-4 w-5 h-5 text-gray-400" />
                 <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 focus:border-transparent text-sm" />
+                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-base transition" />
               </div>
             </div>
 
             <button type="submit" disabled={loading}
-              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 text-white py-3 rounded-xl font-semibold hover:from-orange-600 hover:to-orange-700 transition shadow-md disabled:opacity-60 mt-2">
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl disabled:opacity-60 mt-6 text-base">
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-5">
+          <p className="text-center text-base text-gray-600 mt-8">
             Already have an account?{' '}
-            <Link to="/login" className="text-orange-600 font-semibold hover:underline">Login</Link>
+            <Link to="/login" className="text-blue-600 font-bold hover:text-blue-700 transition">Login</Link>
           </p>
         </div>
       </div>
