@@ -1,0 +1,10 @@
+const express = require('express');
+const router = express.Router();
+const { protect } = require('../middleware/auth');
+const { getVendors, createVendor, updateVendor, deleteVendor } = require('../controllers/vendorController');
+router.use(protect);
+router.get('/', getVendors);
+router.post('/', createVendor);
+router.put('/:id', updateVendor);
+router.delete('/:id', deleteVendor);
+module.exports = router;

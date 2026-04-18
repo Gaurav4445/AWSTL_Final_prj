@@ -1,178 +1,75 @@
-// controllers/taskController.js
 const Task = require('../models/Task');
 
-// Get all tasks for a user
 exports.getTasks = async (req, res, next) => {
   try {
-    const tasks = await Task.find({ userId: req.userId });
-    res.status(200).json({
-      success: true,
-      count: tasks.length,
-      data: tasks,
-    });
-  } catch (error) {
-    next(error);
-  }
+    const tasks = await Task.find({ userId: req.userId }).populate('propertyId', 'name city');
+    res.status(200).json({ success: true, count: tasks.length, data: tasks });
+  } catch (err) { next(err); }
 };
 
-// Get tasks for specific property
 exports.getPropertyTasks = async (req, res, next) => {
   try {
-    const tasks = await Task.find({
-      userId: req.userId,
-      propertyId: req.params.propertyId,
-    });
-    res.status(200).json({
-      success: true,
-      count: tasks.length,
-      data: tasks,
-    });
-  } catch (error) {
-    next(error);
-  }
+    const tasks = await Task.find({ userId: req.userId, propertyId: req.params.propertyId });
+    res.status(200).json({ success: true, count: tasks.length, data: tasks });
+  } catch (err) { next(err); }
 };
 
-// Get single task
 exports.getTask = async (req, res, next) => {
   try {
     const task = await Task.findById(req.params.id);
-    if (!task) {
-      return res.status(404).json({ success: false, error: 'Task not found' });
-    }
+    if (!task) return res.status(404).json({ success: false, error: 'Task not found' });
     res.status(200).json({ success: true, data: task });
-  } catch (error) {
-    next(error);
-  }
+  } catch (err) { next(err); }
 };
 
-// Create task
 exports.createTask = async (req, res, next) => {
   try {
     req.body.userId = req.userId;
     const task = await Task.create(req.body);
     res.status(201).json({ success: true, data: task });
-  } catch (error) {
-    next(error);
-  }
+  } catch (err) { next(err); }
 };
 
-// Update task
 exports.updateTask = async (req, res, next) => {
   try {
     let task = await Task.findById(req.params.id);
-    if (!task) {
-      return res.status(404).json({ success: false, error: 'Task not found' });
-    }
-    if (task.userId.toString() !== req.userId) {
+    if (!task) return res.status(404).json({ success: false, error: 'Task not found' });
+    if (task.userId.toString() !== req.userId)
       return res.status(403).json({ success: false, error: 'Not authorized' });
-    }
-
-    task = await Task.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     res.status(200).json({ success: true, data: task });
-  } catch (error) {
-    next(error);
-  }
+  } catch (err) { next(err); }
 };
 
-// Delete task
 exports.deleteTask = async (req, res, next) => {
   try {
     const task = await Task.findById(req.params.id);
-    if (!task) {
-      return res.status(404).json({ success: false, error: 'Task not found' });
-    }
-    if (task.userId.toString() !== req.userId) {
+    if (!task) return res.status(404).json({ success: false, error: 'Task not found' });
+    if (task.userId.toString() !== req.userId)
       return res.status(403).json({ success: false, error: 'Not authorized' });
-    }
-
     await Task.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true, data: {} });
-  } catch (error) {
-    next(error);
-  }
+  } catch (err) { next(err); }
 };
 
-// Get template tasks (predefined common maintenance tasks)
 exports.getTemplateTasks = async (req, res, next) => {
   try {
-    const templates = await Task.find({ isTemplate: true });
-    
-    // If no templates exist in DB, return some default ones
-    if (templates.length === 0) {
-      const defaultTemplates = [
-        {
-          name: "Change AC Filter",
-          description: "Replace or clean the air filter in split/window AC",
-          category: "AC/Cooling",
-          frequency: "Monthly",
-          estimatedCost: 300,
-          currency: "INR",
-          isTemplate: true
-        },
-        {
-          name: "Clean Water Tank",
-          description: "Drain and clean overhead water tank",
-          category: "Water Systems",
-          frequency: "Quarterly",
-          estimatedCost: 800,
-          currency: "INR",
-          isTemplate: true
-        },
-        {
-          name: "Check Electrical Wiring",
-          description: "Inspect switches, MCB, and wiring for safety",
-          category: "Electrical",
-          frequency: "Bi-Annual",
-          estimatedCost: 500,
-          currency: "INR",
-          isTemplate: true
-        },
-        {
-          name: "Service AC Unit",
-          description: "Full AC servicing including gas check",
-          category: "AC/Cooling",
-          frequency: "Quarterly",
-          estimatedCost: 1500,
-          currency: "INR",
-          isTemplate: true
-        },
-        {
-          name: "Pest Control Spray",
-          description: "General pest control for home",
-          category: "Pest Control",
-          frequency: "Quarterly",
-          estimatedCost: 600,
-          currency: "INR",
-          isTemplate: true
-        },
-        {
-          name: "Clean Bathroom Drains",
-          description: "Unclog and clean drains to prevent blockage",
-          category: "Plumbing",
-          frequency: "Monthly",
-          estimatedCost: 200,
-          currency: "INR",
-          isTemplate: true
-        }
-      ];
-      
-      return res.status(200).json({
-        success: true,
-        count: defaultTemplates.length,
-        data: defaultTemplates,
-        note: "Default templates loaded (no templates saved in DB yet)"
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      count: templates.length,
-      data: templates,
-    });
-  } catch (error) {
-    next(error);
-  }
+    const templates = [
+      { name: 'AC Filter Clean', category: 'AC/Cooling', frequency: 'Monthly', estimatedCost: 300, description: 'Clean or replace split/window AC filter' },
+      { name: 'AC Full Service', category: 'AC/Cooling', frequency: 'Quarterly', estimatedCost: 1500, description: 'Full AC servicing including gas top-up check' },
+      { name: 'Overhead Tank Cleaning', category: 'Water Systems', frequency: 'Quarterly', estimatedCost: 800, description: 'Drain, scrub and refill overhead water tank' },
+      { name: 'RO Service', category: 'RO/Water Purifier', frequency: 'Bi-Annual', estimatedCost: 700, description: 'Replace filters and membrane in RO purifier' },
+      { name: 'Geyser Check', category: 'Electrical', frequency: 'Annual', estimatedCost: 400, description: 'Inspect heating element and thermostat' },
+      { name: 'Electrical Wiring Check', category: 'Electrical', frequency: 'Annual', estimatedCost: 500, description: 'Inspect MCB, switches and wiring for safety' },
+      { name: 'Plumbing Inspection', category: 'Plumbing', frequency: 'Bi-Annual', estimatedCost: 400, description: 'Check taps, flush tanks, pipes for leaks' },
+      { name: 'Drain Cleaning', category: 'Plumbing', frequency: 'Monthly', estimatedCost: 200, description: 'Unclog bathroom and kitchen drains' },
+      { name: 'Pest Control', category: 'Pest Control', frequency: 'Quarterly', estimatedCost: 600, description: 'General pest control spray for home' },
+      { name: 'Termite Treatment', category: 'Pest Control', frequency: 'Annual', estimatedCost: 2000, description: 'Anti-termite treatment for wooden furniture and floors' },
+      { name: 'Inverter Battery Check', category: 'Generator/Inverter', frequency: 'Quarterly', estimatedCost: 300, description: 'Check water level and terminals of inverter battery' },
+      { name: 'LPG Cylinder Booking', category: 'Gas/LPG', frequency: 'Monthly', estimatedCost: 950, description: 'Book gas cylinder refill' },
+      { name: 'Deep Cleaning', category: 'Cleaning', frequency: 'Bi-Annual', estimatedCost: 2500, description: 'Full home deep cleaning including kitchen and bathrooms' },
+      { name: 'CCTV/Security Check', category: 'Security', frequency: 'Bi-Annual', estimatedCost: 500, description: 'Test cameras, door locks, and intercom' },
+    ];
+    res.status(200).json({ success: true, count: templates.length, data: templates });
+  } catch (err) { next(err); }
 };
