@@ -1,37 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, TrendingUp, BarChart3, Calendar, IndianRupee, AlertCircle } from 'lucide-react';
+import { Plus, TrendingUp, BarChart3, Calendar, IndianRupee, CheckSquare } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Navbar } from '../components/Navbar';
 import { PropertyCard } from '../components/PropertyCard';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
 import { Skeleton } from '../components/ui/Skeleton';
-import { PageTransition, StatsCard, AnimatedList } from '../components/Animations';
-import { recordAPI, propertyAPI } from '../services/api';
+import { PageTransition } from '../components/Animations';
+import { recordAPI, propertyAPI, taskAPI } from '../services/api';
 import { getMonthName } from '../utils/dateUtils';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
 const CATEGORY_COLORS = {
-  'AC/Cooling': '#3b82f6',
-  'Water Systems': '#06b6d4',
-  'Electrical': '#eab308',
-  'Plumbing': '#8b5cf6',
-  'Pest Control': '#ef4444',
-  'General': '#6b7280',
-  'Cleaning': '#22c55e',
-  'Safety': '#f97316',
-  'Generator/Inverter': '#6366f1',
-  'Gas/LPG': '#f43f5e',
-  'RO/Water Purifier': '#14b8a6',
-  'Security': '#64748b',
+  'AC/Cooling':        '#1c2b27',
+  'Water Systems':     '#2d6a4f',
+  'Electrical':        '#c47f4e',
+  'Plumbing':          '#6b4c3b',
+  'Pest Control':      '#9b2226',
+  'General':           '#7f8c8d',
+  'Cleaning':          '#52796f',
+  'Safety':            '#b08968',
+  'Generator/Inverter':'#457b9d',
+  'Gas/LPG':           '#e76f51',
+  'RO/Water Purifier': '#2a9d8f',
+  'Security':          '#4a4e69',
 };
+
+const StatCard = ({ icon: Icon, label, value, dark }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 16 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.4 }}
+    style={{
+      background: dark ? '#1c2b27' : '#ffffff',
+      border: dark ? 'none' : '1px solid #e4ddd4',
+      borderRadius: 14,
+      padding: '24px 28px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10,
+      minWidth: 0,
+    }}
+  >
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <Icon size={15} color={dark ? 'rgba(245,237,228,0.6)' : '#6b7565'} />
+      <span style={{
+        fontSize: 11, fontWeight: 700, letterSpacing: '0.09em',
+        color: dark ? 'rgba(245,237,228,0.6)' : '#6b7565',
+        textTransform: 'uppercase',
+      }}>{label}</span>
+    </div>
+    <p style={{
+      fontSize: 42, fontWeight: 700, lineHeight: 1,
+      fontFamily: "'Playfair Display', Georgia, serif",
+      color: dark ? '#f5ede4' : '#1c2b27',
+      margin: 0,
+    }}>{value}</p>
+  </motion.div>
+);
 
 export const DashboardPage = () => {
   const [properties, setProperties] = useState([]);
-  const [stats, setStats] = useState({ totalRecords:0, monthlyRecords:0, totalSpent:0, monthlySpend:[], categoryBreakdown:[] });
+  const [stats, setStats] = useState({ totalRecords: 0, monthlyRecords: 0, totalSpent: 0, monthlySpend: [], categoryBreakdown: [] });
+  const [upcomingCount, setUpcomingCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -40,9 +72,15 @@ export const DashboardPage = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [propsRes, statsRes] = await Promise.all([propertyAPI.getAll(), recordAPI.getDashboardStats()]);
+      const [propsRes, statsRes, tasksRes] = await Promise.all([
+        propertyAPI.getAll(),
+        recordAPI.getDashboardStats(),
+        taskAPI.getAll().catch(() => ({ data: { data: [] } })),
+      ]);
       setProperties(propsRes.data.data);
       setStats(statsRes.data.data);
+      const pending = (tasksRes.data.data || []).filter(t => !t.completed);
+      setUpcomingCount(pending.length);
     } catch (err) {
       toast.error('Failed to load dashboard data');
     } finally { setLoading(false); }
@@ -51,7 +89,6 @@ export const DashboardPage = () => {
   const chartData = (stats.monthlySpend || []).map(item => ({
     month: getMonthName(item._id.month),
     spent: item.total,
-    count: item.count,
   }));
 
   const pieData = (stats.categoryBreakdown || []).slice(0, 6).map(item => ({
@@ -59,164 +96,162 @@ export const DashboardPage = () => {
     value: item.total,
   }));
 
-  const greeting = () => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good Morning';
-    if (h < 17) return 'Good Afternoon';
-    return 'Good Evening';
-  };
-
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#f2ebe1', fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
         <Navbar />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          {/* Header */}
+
+        <main style={{ flex: 1, padding: '48px 48px 64px', overflowY: 'auto' }}>
+
+          {/* ── Page header ── */}
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12"
+            style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 40 }}
           >
             <div>
-              <p className="text-blue-600 font-semibold text-base">{greeting()}, {user?.name?.split(' ')[0]} 👋</p>
-              <h1 className="text-5xl font-bold text-gray-900 mt-2">Dashboard</h1>
-              <p className="text-gray-600 mt-2 text-base">Track your home maintenance at a glance</p>
+              <h1 style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: 'clamp(28px, 3vw, 44px)',
+                fontWeight: 800,
+                color: '#1c2b27',
+                margin: 0,
+                lineHeight: 1.1,
+              }}>
+                Your home, <em style={{ color: '#c47f4e', fontStyle: 'italic' }}>at a glance.</em>
+              </h1>
+              <p style={{ color: '#6b7565', fontSize: 15, marginTop: 8 }}>
+                A calm view of what's done, what's due, and what it costs.
+              </p>
             </div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link to="/properties">
-                <Button size="lg" className="gap-2">
-                  <Plus className="w-5 h-5" /> Add Property
-                </Button>
+
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+              <Link to="/history" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                background: '#c47f4e', color: '#fff',
+                padding: '12px 22px', borderRadius: 50,
+                fontSize: 14, fontWeight: 600,
+                textDecoration: 'none',
+                boxShadow: '0 2px 12px rgba(196,127,78,0.35)',
+              }}>
+                + Log service →
               </Link>
             </motion.div>
           </motion.div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
-            <StatsCard
-              icon={BarChart3}
-              title="Total Records"
-              value={stats.totalRecords}
-              subtitle="All time maintenance logs"
-              gradient="bg-gradient-to-br from-blue-50 to-blue-100"
-            />
-            <StatsCard
-              icon={Calendar}
-              title="This Month"
-              value={stats.monthlyRecords}
-              subtitle="Services done this month"
-              gradient="bg-gradient-to-br from-purple-50 to-purple-100"
-            />
-            <StatsCard
-              icon={IndianRupee}
-              title="Total Spent"
-              value={`₹${(stats.totalSpent || 0).toLocaleString('en-IN')}`}
-              subtitle="Overall maintenance spend"
-              gradient="bg-gradient-to-br from-green-50 to-green-100"
-            />
+          {/* ── Stat cards ── */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 32 }}>
+            {loading ? (
+              [1,2,3,4].map(i => <Skeleton key={i} className="h-32 rounded-2xl" />)
+            ) : (
+              <>
+                <StatCard icon={BarChart3}    label="Total Services"  value={stats.totalRecords}  dark />
+                <StatCard icon={Calendar}     label="This Month"      value={stats.monthlyRecords} />
+                <StatCard icon={IndianRupee}  label="Total Spent"     value={`₹${(stats.totalSpent || 0).toLocaleString('en-IN')}`} />
+                <StatCard icon={CheckSquare}  label="Upcoming Tasks"  value={upcomingCount} />
+              </>
+            )}
           </div>
 
-          {/* Charts */}
+          {/* ── Charts ── */}
           {chartData.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-              className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10"
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.15 }}
+              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 32 }}
             >
-              {/* Monthly Spend */}
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-gray-900">
-                    <TrendingUp className="w-5 h-5 text-blue-600" />
-                    Monthly Spend
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                      <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#6b7280' }} />
-                      <YAxis tick={{ fontSize: 11, fill: '#6b7280' }} tickFormatter={(v) => `₹${v >= 1000 ? (v/1000).toFixed(0)+'k' : v}`} />
-                      <Tooltip formatter={(val) => [`₹${val.toLocaleString('en-IN')}`, 'Spent']} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
-                      <Bar dataKey="spent" fill="#2563eb" radius={[6,6,0,0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+              {/* Bar chart */}
+              <div style={{ background: '#fff', border: '1px solid #e4ddd4', borderRadius: 16, padding: '28px 24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                  <h2 style={{ fontSize: 17, fontWeight: 700, color: '#1c2b27', margin: 0 }}>Last 6 months spend</h2>
+                  <span style={{
+                    fontSize: 11, fontWeight: 600, color: '#6b7565',
+                    background: '#f2ebe1', border: '1px solid #e4ddd4',
+                    padding: '4px 10px', borderRadius: 20,
+                  }}>₹ INR</span>
+                </div>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={chartData} barSize={32}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ede6dc" vertical={false} />
+                    <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#9b8f85' }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 11, fill: '#9b8f85' }} axisLine={false} tickLine={false}
+                      tickFormatter={v => `₹${v >= 1000 ? (v/1000).toFixed(0)+'k' : v}`} />
+                    <Tooltip
+                      formatter={val => [`₹${val.toLocaleString('en-IN')}`, 'Spent']}
+                      contentStyle={{ borderRadius: 10, border: '1px solid #e4ddd4', fontSize: 13, color: '#1c2b27' }}
+                      cursor={{ fill: 'rgba(28,43,39,0.05)' }}
+                    />
+                    <Bar dataKey="spent" fill="#1c2b27" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
 
-              {/* Category Pie */}
+              {/* Pie chart */}
               {pieData.length > 0 && (
-                <Card className="shadow-lg">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-gray-900">
-                      <BarChart3 className="w-5 h-5 text-blue-600" />
-                      Spend by Category
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <PieChart>
-                        <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} paddingAngle={3} dataKey="value">
-                          {pieData.map((entry, i) => (
-                            <Cell key={i} fill={CATEGORY_COLORS[entry.name] || '#6b7280'} />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(val) => `₹${val.toLocaleString('en-IN')}`} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
-                        <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
+                <div style={{ background: '#fff', border: '1px solid #e4ddd4', borderRadius: 16, padding: '28px 24px' }}>
+                  <h2 style={{ fontSize: 17, fontWeight: 700, color: '#1c2b27', margin: '0 0 20px' }}>Spend by category</h2>
+                  <ResponsiveContainer width="100%" height={220}>
+                    <PieChart>
+                      <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={3} dataKey="value">
+                        {pieData.map((entry, i) => (
+                          <Cell key={i} fill={CATEGORY_COLORS[entry.name] || '#7f8c8d'} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={val => `₹${val.toLocaleString('en-IN')}`}
+                        contentStyle={{ borderRadius: 10, border: '1px solid #e4ddd4', fontSize: 13 }}
+                      />
+                      <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: '#6b7565', paddingTop: 10 }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
               )}
             </motion.div>
           )}
 
-          {/* Properties */}
+          {/* ── Properties ── */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25 }}
           >
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Your Properties</h2>
-              <Link to="/properties" className="text-blue-600 text-sm font-bold hover:text-blue-700 transition">View all →</Link>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#1c2b27', margin: 0 }}>Your Properties</h2>
+              <Link to="/properties" style={{ fontSize: 13, fontWeight: 600, color: '#c47f4e', textDecoration: 'none' }}>
+                View all →
+              </Link>
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[1,2,3].map(i => (
-                  <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.1 }}>
-                    <Skeleton className="h-64 rounded-2xl" />
-                  </motion.div>
-                ))}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                {[1,2,3].map(i => <Skeleton key={i} className="h-56 rounded-2xl" />)}
               </div>
             ) : properties.length === 0 ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-white rounded-2xl p-16 text-center border-2 border-dashed border-gray-300 shadow-sm"
-              >
-                <p className="text-gray-700 font-semibold text-lg">No properties yet</p>
-                <p className="text-gray-500 text-base mt-2 mb-6">Add your home or flat to get started</p>
-                <Link to="/properties">
-                  <Button size="lg" className="gap-2">
-                    <Plus className="w-5 h-5" /> Add Property
-                  </Button>
+              <div style={{
+                background: '#fff', border: '2px dashed #d8d1c7',
+                borderRadius: 16, padding: '64px 32px', textAlign: 'center',
+              }}>
+                <p style={{ fontSize: 16, fontWeight: 600, color: '#1c2b27', margin: '0 0 8px' }}>No properties yet</p>
+                <p style={{ fontSize: 14, color: '#6b7565', margin: '0 0 24px' }}>Add your home or flat to get started</p>
+                <Link to="/properties" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  background: '#1c2b27', color: '#f5ede4',
+                  padding: '12px 22px', borderRadius: 10,
+                  fontSize: 14, fontWeight: 600, textDecoration: 'none',
+                }}>
+                  <Plus size={16} /> Add Property
                 </Link>
-              </motion.div>
+              </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
                 {properties.map((prop, idx) => (
                   <motion.div
                     key={prop._id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: idx * 0.1, duration: 0.4 }}
-                    viewport={{ once: true }}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.08, duration: 0.35 }}
                   >
                     <PropertyCard property={prop} onDelete={() => {}} onEdit={() => {}} />
                   </motion.div>
@@ -224,6 +259,7 @@ export const DashboardPage = () => {
               </div>
             )}
           </motion.div>
+
         </main>
       </div>
     </PageTransition>
