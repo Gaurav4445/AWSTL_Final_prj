@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Filter, IndianRupee, Calendar, AlertCircle, Trash2, Edit2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '../components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
@@ -99,25 +99,46 @@ export const HistoryPage = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#f2ebe1', fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
         <Navbar />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <main style={{ flex: 1, padding: '48px 48px 64px', overflowY: 'auto' }}>
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10"
+            style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 40, justifyContent: 'space-between' }}
           >
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900">Maintenance History</h1>
-              <p className="text-gray-600 mt-2 text-base">Log all your home service records</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div>
+                <h1 style={{
+                  fontFamily: "'Playfair Display', Georgia, serif",
+                  fontSize: 'clamp(28px, 3vw, 44px)',
+                  fontWeight: 800,
+                  color: '#1c2b27',
+                  margin: 0,
+                  lineHeight: 1.1,
+                }}>
+                  Maintenance <em style={{ color: '#c47f4e', fontStyle: 'italic' }}>History</em>
+                </h1>
+                <p style={{ color: '#6b7565', fontSize: 15, marginTop: 8 }}>
+                  Log all your home service records
+                </p>
+              </div>
+              <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+                <Button size="lg" onClick={() => setShowForm(!showForm)} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  background: showForm ? '#6b7565' : '#1c2b27', color: '#fff',
+                  padding: '12px 22px', borderRadius: 10,
+                  fontSize: 14, fontWeight: 600,
+                  cursor: 'pointer',
+                  border: 'none',
+                  transition: 'background 0.2s',
+                }} className="gap-2">
+                  <Plus className="w-5 h-5" />
+                  {showForm ? 'Cancel' : 'Log Service'}
+                </Button>
+              </motion.div>
             </div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button size="lg" onClick={() => setShowForm(!showForm)} className="gap-2">
-                <Plus className="w-5 h-5" />
-                {showForm ? 'Cancel' : 'Log Service'}
-              </Button>
-            </motion.div>
           </motion.div>
 
           {/* Form */}
@@ -128,15 +149,15 @@ export const HistoryPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className="mb-10"
+                style={{ marginBottom: 32 }}
               >
-                <Card className="shadow-lg">
-                  <CardHeader>
-                    <CardTitle>Log Service Record</CardTitle>
-                    <CardDescription>Add a new maintenance or service record</CardDescription>
+                <Card style={{ background: '#fff', borderRadius: 16, border: '1px solid #e4ddd4', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+                  <CardHeader style={{ padding: 28 }}>
+                    <CardTitle style={{ color: '#1c2b27', fontSize: 20, fontWeight: 700 }}>Log Service Record</CardTitle>
+                    <CardDescription style={{ color: '#6b7565', marginTop: 8 }}>Add a new maintenance or service record</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <CardContent style={{ padding: 28, paddingTop: 0 }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }}>
                         <Label htmlFor="propertyId">Property *</Label>
                         <Select id="propertyId" name="propertyId" value={formData.propertyId} onChange={handleChange} required className="mt-2">
@@ -182,9 +203,9 @@ export const HistoryPage = () => {
                         </Select>
                       </motion.div>
 
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="sm:col-span-2 flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="secondary" onClick={resetForm}>Cancel</Button>
-                        <Button type="submit">Log Service</Button>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 12, paddingTop: 16 }}>
+                        <Button type="button" variant="secondary" onClick={resetForm} style={{ padding: '10px 24px', borderRadius: 10, background: '#e4ddd4', color: '#1c2b27', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Cancel</Button>
+                        <Button type="submit" style={{ padding: '10px 24px', borderRadius: 10, background: '#1c2b27', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Log Service</Button>
                       </motion.div>
                     </form>
                   </CardContent>
@@ -198,13 +219,13 @@ export const HistoryPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mb-8 flex gap-4 flex-wrap"
+            style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}
           >
-            <Select value={filterProperty} onChange={(e) => setFilterProperty(e.target.value)} className="max-w-xs">
+            <Select value={filterProperty} onChange={(e) => setFilterProperty(e.target.value)} style={{ maxWidth: '250px' }}>
               <option value="all">All Properties</option>
               {properties.map(p => <option key={p._id} value={p._id}>{p.name}</option>)}
             </Select>
-            <Select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="max-w-xs">
+            <Select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} style={{ maxWidth: '250px' }}>
               <option value="all">All Categories</option>
               {CATEGORIES.map(c => <option key={c}>{c}</option>)}
             </Select>
@@ -215,24 +236,24 @@ export const HistoryPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="mb-6 text-right"
+            style={{ marginBottom: 32, textAlign: 'right' }}
           >
-            <p className="text-gray-700 font-semibold">Total Spent: <span className="text-2xl text-blue-600">₹{totalFiltered.toLocaleString('en-IN')}</span></p>
+            <p style={{ fontSize: 16, color: '#6b7565', fontWeight: 600, margin: 0 }}>Total Spent: <span style={{ fontSize: 28, color: '#1c2b27', fontWeight: 800 }}>₹{totalFiltered.toLocaleString('en-IN')}</span></p>
           </motion.div>
 
           {/* Records List */}
           {loading ? (
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[1,2,3].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)}
             </div>
           ) : filtered.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-2xl p-12 text-center border-2 border-dashed border-gray-300"
+              style={{ background: '#fff', borderRadius: 16, padding: '48px 32px', textAlign: 'center', border: '2px dashed #d8d1c7' }}
             >
-              <p className="text-gray-700 font-semibold text-lg">No records found</p>
-              <p className="text-gray-500 text-base mt-2">Log a service to get started</p>
+              <p style={{ fontSize: 16, fontWeight: 600, color: '#1c2b27', margin: '0 0 8px' }}>No records found</p>
+              <p style={{ fontSize: 14, color: '#6b7565', margin: 0 }}>Log a service to get started</p>
             </motion.div>
           ) : (
             <AnimatedList

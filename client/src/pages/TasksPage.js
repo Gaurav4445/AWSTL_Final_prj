@@ -88,21 +88,41 @@ export const TasksPage = () => {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <div style={{ display: 'flex', minHeight: '100vh', background: '#f2ebe1', fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
         <Navbar />
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <main style={{ flex: 1, padding: '48px 48px 64px', overflowY: 'auto' }}>
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10"
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40 }}
           >
             <div>
-              <h1 className="text-4xl font-bold text-gray-900">Tasks</h1>
-              <p className="text-gray-600 mt-2 text-base">Track and manage your maintenance tasks</p>
+              <h1 style={{
+                fontFamily: "'Playfair Display', Georgia, serif",
+                fontSize: 'clamp(28px, 3vw, 44px)',
+                fontWeight: 800,
+                color: '#1c2b27',
+                margin: 0,
+                lineHeight: 1.1,
+              }}>
+                Your <em style={{ color: '#c47f4e', fontStyle: 'italic' }}>Tasks</em>
+              </h1>
+              <p style={{ color: '#6b7565', fontSize: 15, marginTop: 8 }}>
+                Stay on top of your maintenance schedule.
+              </p>
             </div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button size="lg" onClick={() => setShowForm(!showForm)} className="gap-2">
+
+            <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
+              <Button size="lg" onClick={() => setShowForm(!showForm)} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                background: showForm ? '#6b7565' : '#1c2b27', color: '#fff',
+                padding: '12px 22px', borderRadius: 10,
+                fontSize: 14, fontWeight: 600,
+                cursor: 'pointer',
+                border: 'none',
+                transition: 'background 0.2s',
+              }} className="gap-2">
                 <Plus className="w-5 h-5" />
                 {showForm ? 'Cancel' : 'New Task'}
               </Button>
@@ -116,15 +136,15 @@ export const TasksPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                className="mb-10"
+                style={{ marginBottom: 32 }}
               >
-                <Card className="shadow-lg">
-                  <CardHeader>
-                    <CardTitle>Create New Task</CardTitle>
-                    <CardDescription>Add a task to track your maintenance schedule</CardDescription>
+                <Card style={{ background: '#fff', borderRadius: 16, border: '1px solid #e4ddd4', boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }}>
+                  <CardHeader style={{ padding: 28 }}>
+                    <CardTitle style={{ color: '#1c2b27', fontSize: 20, fontWeight: 700 }}>Create New Task</CardTitle>
+                    <CardDescription style={{ color: '#6b7565', marginTop: 8 }}>Add a task to track your maintenance schedule</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <CardContent style={{ padding: 28, paddingTop: 0 }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.05 }}>
                         <Label htmlFor="title">Task Title *</Label>
                         <Input id="title" type="text" name="title" value={formData.title} onChange={handleChange} required placeholder="e.g. AC Servicing" className="mt-2" />
@@ -157,9 +177,9 @@ export const TasksPage = () => {
                         <Textarea id="description" name="description" value={formData.description} onChange={handleChange} rows={2} placeholder="Details about the task..." className="mt-2" />
                       </motion.div>
 
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="sm:col-span-2 flex justify-end gap-3 pt-4">
-                        <Button type="button" variant="secondary" onClick={resetForm}>Cancel</Button>
-                        <Button type="submit">Create Task</Button>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 12, paddingTop: 16 }}>
+                        <Button type="button" variant="secondary" onClick={resetForm} style={{ padding: '10px 24px', borderRadius: 10, background: '#e4ddd4', color: '#1c2b27', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Cancel</Button>
+                        <Button type="submit" style={{ padding: '10px 24px', borderRadius: 10, background: '#1c2b27', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}>Create Task</Button>
                       </motion.div>
                     </form>
                   </CardContent>
@@ -173,14 +193,14 @@ export const TasksPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mb-8 flex gap-4 flex-wrap"
+            style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}
           >
-            <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="max-w-xs">
+            <Select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={{ maxWidth: '250px' }}>
               <option value="all">All Tasks</option>
               <option value="pending">Pending</option>
               <option value="completed">Completed</option>
             </Select>
-            <Select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)} className="max-w-xs">
+            <Select value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)} style={{ maxWidth: '250px' }}>
               <option value="all">All Priorities</option>
               <option value="High">High</option>
               <option value="Medium">Medium</option>
@@ -193,44 +213,44 @@ export const TasksPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}
           >
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-gray-600 text-sm font-semibold">Total Tasks</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{tasks.length}</p>
+            <Card style={{ background: '#fff', borderRadius: 14, border: '1px solid #e4ddd4' }}>
+              <CardContent style={{ padding: 24 }}>
+                <p style={{ color: '#6b7565', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', margin: '0 0 12px' }}>Total Tasks</p>
+                <p style={{ fontSize: 32, fontWeight: 700, color: '#1c2b27', margin: 0 }}>{tasks.length}</p>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-gray-600 text-sm font-semibold">Completed</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">{tasks.filter(t => t.completed).length}</p>
+            <Card style={{ background: '#fff', borderRadius: 14, border: '1px solid #e4ddd4' }}>
+              <CardContent style={{ padding: 24 }}>
+                <p style={{ color: '#6b7565', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', margin: '0 0 12px' }}>Completed</p>
+                <p style={{ fontSize: 32, fontWeight: 700, color: '#22c55e', margin: 0 }}>{tasks.filter(t => t.completed).length}</p>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-gray-600 text-sm font-semibold">Pending</p>
-                <p className="text-3xl font-bold text-orange-600 mt-2">{tasks.filter(t => !t.completed).length}</p>
+            <Card style={{ background: '#fff', borderRadius: 14, border: '1px solid #e4ddd4' }}>
+              <CardContent style={{ padding: 24 }}>
+                <p style={{ color: '#6b7565', fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.09em', margin: '0 0 12px' }}>Pending</p>
+                <p style={{ fontSize: 32, fontWeight: 700, color: '#ea580c', margin: 0 }}>{tasks.filter(t => !t.completed).length}</p>
               </CardContent>
             </Card>
           </motion.div>
 
           {/* Tasks List */}
           {loading ? (
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {[1,2,3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
             </div>
           ) : filtered.length === 0 ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="bg-white rounded-2xl p-12 text-center border-2 border-dashed border-gray-300"
+              style={{ background: '#fff', borderRadius: 16, padding: '48px 32px', textAlign: 'center', border: '2px dashed #d8d1c7' }}
             >
-              <p className="text-gray-700 font-semibold text-lg">No tasks found</p>
-              <p className="text-gray-500 text-base mt-2">Create a task to get started</p>
+              <p style={{ fontSize: 16, fontWeight: 600, color: '#1c2b27', margin: '0 0 8px' }}>No tasks found</p>
+              <p style={{ fontSize: 14, color: '#6b7565', margin: 0 }}>Create a task to get started</p>
             </motion.div>
           ) : (
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {filtered.map((task, idx) => {
                 const PriorityIcon = priorityConfig[task.priority]?.icon || AlertTriangle;
                 return (
