@@ -129,13 +129,15 @@ export const DashboardPage = () => {
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
               <Link to="/history" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
-                background: '#c47f4e', color: '#fff',
-                padding: '12px 22px', borderRadius: 50,
-                fontSize: 14, fontWeight: 600,
+                background: 'linear-gradient(135deg, #c47f4e 0%, #b8754a 100%)', color: '#fff',
+                padding: '12px 24px', borderRadius: 50,
+                fontSize: 14, fontWeight: 700,
                 textDecoration: 'none',
-                boxShadow: '0 2px 12px rgba(196,127,78,0.35)',
+                boxShadow: '0 4px 16px rgba(196,127,78,0.4)',
+                transition: 'all 0.3s ease',
+                letterSpacing: '0.3px',
               }}>
-                + Log service →
+                📝 Log Service
               </Link>
             </motion.div>
           </motion.div>

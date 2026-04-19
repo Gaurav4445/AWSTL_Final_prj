@@ -210,18 +210,21 @@ export const PropertyDetailPage = () => {
                   icon={Home}
                   title="Total Records"
                   value={records.length}
+                  gradient="bg-gradient-to-br from-blue-500 to-blue-600"
                   delay={0}
                 />
                 <StatsCard
                   icon={Zap}
                   title="Total Spent"
                   value={`₹${totalSpent.toLocaleString()}`}
+                  gradient="bg-gradient-to-br from-green-500 to-green-600"
                   delay={0.1}
                 />
                 <StatsCard
                   icon={Clock}
                   title="Active Tasks"
                   value={activeTasks}
+                  gradient="bg-gradient-to-br from-orange-500 to-orange-600"
                   delay={0.2}
                 />
               </div>

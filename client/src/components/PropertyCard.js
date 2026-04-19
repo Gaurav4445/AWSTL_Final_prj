@@ -1,91 +1,97 @@
 import React from 'react';
-import { Building2, MapPin, Trash2, Edit2, ArrowRight, Home } from 'lucide-react';
+import { MapPin, Trash2, Edit2, ArrowRight, Home, Building2, Maximize2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
-const typeColors = {
-  'Apartment':        'bg-blue-100 text-blue-800',
-  'Independent House':'bg-green-100 text-green-800',
-  'Villa':            'bg-purple-100 text-purple-800',
-  'Studio':           'bg-yellow-100 text-yellow-800',
-  'Row House':        'bg-pink-100 text-pink-800',
-  'Builder Floor':    'bg-orange-100 text-orange-800',
-  'Bungalow':         'bg-teal-100 text-teal-800',
+const TYPE_ACCENT = {
+  'Apartment':        '#457b9d',
+  'Independent House':'#2d6a4f',
+  'Villa':            '#6b4c3b',
+  'Studio':           '#c47f4e',
+  'Row House':        '#9b2226',
+  'Builder Floor':    '#4a4e69',
+  'Bungalow':         '#2a9d8f',
 };
 
 export const PropertyCard = ({ property, onDelete, onEdit }) => {
-  return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 overflow-hidden border border-gray-200 group hover:border-blue-200">
-      {/* Top color bar */}
-      <div className="h-3 bg-gradient-to-r from-blue-600 to-indigo-600" />
+  const accent = TYPE_ACCENT[property.propertyType] || '#1c2b27';
 
-      <div className="p-6">
+  return (
+    <motion.div whileHover={{ y: -4, boxShadow: '0 12px 32px rgba(0,0,0,0.14)' }} transition={{ duration: 0.2 }}
+      style={{ background: '#fff', borderRadius: 18, overflow: 'hidden', border: '1px solid #e4ddd4', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+      {/* Top accent bar */}
+      <div style={{ height: 4, background: accent }} />
+
+      <div style={{ padding: '20px 22px' }}>
         {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-start gap-3">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Home className="w-6 h-6 text-blue-600" />
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: `${accent}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <Home size={20} color={accent} />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900 leading-tight">{property.name}</h3>
-              <div className="flex items-center gap-1 text-gray-600 text-sm mt-1">
-                <MapPin className="w-4 h-4" />
-                <span>{property.city}{property.state ? `, ${property.state}` : ''}</span>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#1c2b27', margin: 0, lineHeight: 1.3 }}>{property.name}</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 3 }}>
+                <MapPin size={12} color="#6b7565" />
+                <span style={{ fontSize: 13, color: '#6b7565' }}>{property.city}{property.state ? `, ${property.state}` : ''}</span>
               </div>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => onEdit(property)} className="p-2 hover:bg-blue-50 rounded-lg transition" title="Edit">
-              <Edit2 className="w-4 h-4 text-blue-600" />
-            </button>
-            <button onClick={() => onDelete(property._id)} className="p-2 hover:bg-red-50 rounded-lg transition" title="Delete">
-              <Trash2 className="w-4 h-4 text-red-600" />
-            </button>
+          <div style={{ display: 'flex', gap: 4 }}>
+            <motion.button whileHover={{ scale: 1.1 }} onClick={() => onEdit(property)}
+              style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: '#f2ebe1', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Edit2 size={13} color="#6b7565" />
+            </motion.button>
+            <motion.button whileHover={{ scale: 1.1 }} onClick={() => onDelete(property._id)}
+              style={{ width: 32, height: 32, borderRadius: 8, border: 'none', background: '#fef2f2', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Trash2 size={13} color="#dc2626" />
+            </motion.button>
           </div>
         </div>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-2 mb-4">
-          <span className={`text-xs font-semibold px-3 py-1 rounded-full ${typeColors[property.propertyType] || 'bg-gray-100 text-gray-700'}`}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 16 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20, background: `${accent}18`, color: accent }}>
             {property.propertyType}
           </span>
           {property.bhkType && (
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-blue-100 text-blue-800">
+            <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20, background: '#f2ebe1', color: '#6b7565' }}>
               {property.bhkType}
             </span>
           )}
           {property.societyName && (
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-gray-100 text-gray-700">
+            <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 20, background: '#f2ebe1', color: '#6b7565', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {property.societyName}
             </span>
           )}
         </div>
 
         {/* Details */}
-        <div className="grid grid-cols-2 gap-3 text-sm border-t border-gray-100 pt-4 mb-5">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 18, paddingTop: 14, borderTop: '1px solid #f2ebe1' }}>
           <div>
-            <p className="text-gray-500 text-xs font-semibold mb-1">Area</p>
-            <p className="font-bold text-gray-800">{property.squareFeet ? `${property.squareFeet} sq ft` : '—'}</p>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: '#9b8f85', textTransform: 'uppercase', margin: '0 0 3px' }}>Area</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#1c2b27', margin: 0 }}>{property.squareFeet ? `${property.squareFeet} sq ft` : '—'}</p>
           </div>
           <div>
-            <p className="text-gray-500 text-xs font-semibold mb-1">Floor</p>
-            <p className="font-bold text-gray-800">{property.floorNumber ? `Floor ${property.floorNumber}` : '—'}</p>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: '#9b8f85', textTransform: 'uppercase', margin: '0 0 3px' }}>Floor</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#1c2b27', margin: 0 }}>{property.floorNumber ? `Floor ${property.floorNumber}` : '—'}</p>
           </div>
           {property.pincode && (
             <div>
-              <p className="text-gray-500 text-xs font-semibold mb-1">Pincode</p>
-              <p className="font-bold text-gray-800">{property.pincode}</p>
+              <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: '#9b8f85', textTransform: 'uppercase', margin: '0 0 3px' }}>Pincode</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#1c2b27', margin: 0 }}>{property.pincode}</p>
             </div>
           )}
         </div>
 
-        <Link
-          to={`/property/${property._id}`}
-          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 text-blue-700 font-semibold text-sm py-3 rounded-lg transition group-hover:from-blue-100 group-hover:to-indigo-100 border border-blue-200"
+        <Link to={`/property/${property._id}`}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px 0', borderRadius: 10, background: '#1c2b27', color: '#f5ede4', fontSize: 13, fontWeight: 600, textDecoration: 'none', transition: 'background 0.15s' }}
+          onMouseEnter={e => e.currentTarget.style.background = accent}
+          onMouseLeave={e => e.currentTarget.style.background = '#1c2b27'}
         >
-          View Details
-          <ArrowRight className="w-4 h-4" />
+          View Details <ArrowRight size={14} />
         </Link>
       </div>
-    </div>
+    </motion.div>
   );
 };

@@ -35,6 +35,8 @@ exports.updateRecord = async (req, res, next) => {
   try {
     let record = await MaintenanceRecord.findById(req.params.id);
     if (!record) return res.status(404).json({ success: false, error: 'Record not found' });
+    if (record.userId.toString() !== req.userId)
+      return res.status(403).json({ success: false, error: 'Not authorized' });
     record = await MaintenanceRecord.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     await record.populate(['propertyId', 'taskId', 'vendorId']);
     res.status(200).json({ success: true, data: record });
@@ -43,8 +45,11 @@ exports.updateRecord = async (req, res, next) => {
 
 exports.deleteRecord = async (req, res, next) => {
   try {
-    const record = await MaintenanceRecord.findByIdAndDelete(req.params.id);
+    const record = await MaintenanceRecord.findById(req.params.id);
     if (!record) return res.status(404).json({ success: false, error: 'Record not found' });
+    if (record.userId.toString() !== req.userId)
+      return res.status(403).json({ success: false, error: 'Not authorized' });
+    await MaintenanceRecord.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true, data: {} });
   } catch (err) { next(err); }
 };

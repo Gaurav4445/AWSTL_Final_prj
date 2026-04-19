@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Building2 } from 'lucide-react';
+import { Plus, Building2, Home, Warehouse, DollarSign, Ruler } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '../components/Navbar';
 import { PropertyCard } from '../components/PropertyCard';
@@ -107,12 +107,13 @@ export const PropertiesPage = () => {
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
               <Button size="lg" onClick={() => { resetForm(); setShowForm(!showForm); }} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
-                background: showForm && !editingProperty ? '#6b7565' : '#1c2b27', color: '#fff',
-                padding: '12px 22px', borderRadius: 10,
-                fontSize: 14, fontWeight: 600,
+                background: showForm && !editingProperty ? '#6b7565' : 'linear-gradient(135deg, #1c2b27 0%, #2d4a3e 100%)', color: '#fff',
+                padding: '12px 24px', borderRadius: 10,
+                fontSize: 14, fontWeight: 700,
                 cursor: 'pointer',
                 border: 'none',
-                transition: 'background 0.2s',
+                boxShadow: '0 4px 16px rgba(28,43,39,0.3)',
+                transition: 'all 0.2s',
               }} className="gap-2">
                 <Plus className="w-5 h-5" />
                 {showForm && !editingProperty ? 'Cancel' : 'Add Property'}
@@ -131,9 +132,9 @@ export const PropertiesPage = () => {
                 style={{ marginBottom: 32 }}
               >
                 <Card className="shadow-lg" style={{ background: '#fff', borderRadius: 16, border: '1px solid #e4ddd4' }}>
-                  <CardHeader style={{ padding: 28 }}>
-                    <CardTitle style={{ color: '#1c2b27', fontSize: 20, fontWeight: 700 }}>{editingProperty ? 'Edit Property' : 'Add New Property'}</CardTitle>
-                    <CardDescription style={{ color: '#6b7565', marginTop: 8 }}>{editingProperty ? 'Update your property details' : 'Add a new home or apartment'}</CardDescription>
+                  <CardHeader style={{ padding: 28, borderBottom: '1px solid #f0e9e0', background: 'linear-gradient(135deg, #1c2b27 0%, #2d4a3e 100%)' }}>
+                    <CardTitle style={{ color: '#f5ede4', fontSize: 20, fontWeight: 700 }}>{editingProperty ? 'Edit Property' : 'Add New Property'}</CardTitle>
+                    <CardDescription style={{ color: 'rgba(245,237,228,0.7)', marginTop: 8 }}>{editingProperty ? 'Update your property details' : 'Add a new home or apartment'}</CardDescription>
                   </CardHeader>
                   <CardContent style={{ padding: 28, paddingTop: 0 }}>
                     <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>

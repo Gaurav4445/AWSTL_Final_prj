@@ -12,7 +12,7 @@ const PageTransition = ({ children }) => (
   </motion.div>
 );
 
-const StatsCard = ({ icon: Icon, title, value, subtitle, gradient }) => (
+const StatsCard = ({ icon: Icon, title, value, subtitle, gradient = 'bg-gradient-to-br from-blue-500 to-blue-600' }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -22,7 +22,7 @@ const StatsCard = ({ icon: Icon, title, value, subtitle, gradient }) => (
   >
     <div className="flex items-center justify-between mb-4">
       <h3 className="text-gray-700 font-semibold text-sm">{title}</h3>
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${gradient.split(' ')[2]}`}>
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white ${gradient.split(' ')[2] || 'bg-blue-500'}`}>
         <Icon className="w-6 h-6" />
       </div>
     </div>
