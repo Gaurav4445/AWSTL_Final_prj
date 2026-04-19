@@ -134,7 +134,7 @@ export const DashboardPage = () => {
                 transition: 'all 0.3s ease',
                 letterSpacing: '0.3px',
               }}>
-                📝 Log Service
+                 Log Service
               </Link>
             </motion.div>
           </motion.div>
