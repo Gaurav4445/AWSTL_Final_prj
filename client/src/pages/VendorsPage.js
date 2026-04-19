@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Phone, MapPin, Star, Trash2, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Navbar } from '../components/Navbar';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Label } from '../components/ui/FormElements';
 import { CategorySelect } from '../components/ui/CategorySelect';
@@ -11,6 +9,7 @@ import { Skeleton } from '../components/ui/Skeleton';
 import { PageTransition } from '../components/Animations';
 import { vendorAPI } from '../services/api';
 import { toast } from 'sonner';
+
 
 const EMPTY_FORM = { name:'', category:'', phone:'', city:'', rating:5, notes:'' };
 const CATEGORIES = ['Plumber','Electrician','AC Mechanic','Carpenter','Painter','Pest Control','Cleaning Service','RO Technician','Inverter/Battery','Gas Agency','Security','General Handyman'];
@@ -153,10 +152,10 @@ export const VendorsPage = () => {
           {/* Filter */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
             style={{ marginBottom: 28 }}>
-            <Select value={filterSpec} onChange={e => setFilterSpec(e.target.value)} style={{ maxWidth: 240 }}>
+            <select value={filterSpec} onChange={e => setFilterSpec(e.target.value)} style={{ maxWidth: 240, width: '100%', minHeight: 44, borderRadius: 10, border: '1.5px solid #d8d1c7', padding: '10px 14px', fontFamily: 'inherit', background: '#fff', color: '#1c2b27' }}>
               <option value="all">All Categories</option>
               {CATEGORIES.map(s => <option key={s}>{s}</option>)}
-            </Select>
+            </select>
           </motion.div>
 
           {/* Vendors Grid */}

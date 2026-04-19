@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Plus, TrendingUp, BarChart3, Calendar, IndianRupee, CheckSquare } from 'lucide-react';
+import { Plus, BarChart3, Calendar, IndianRupee, CheckSquare } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { Navbar } from '../components/Navbar';
 import { PropertyCard } from '../components/PropertyCard';
@@ -9,7 +9,6 @@ import { Skeleton } from '../components/ui/Skeleton';
 import { PageTransition } from '../components/Animations';
 import { recordAPI, propertyAPI, taskAPI } from '../services/api';
 import { getMonthName } from '../utils/dateUtils';
-import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
 const CATEGORY_COLORS = {
@@ -65,8 +64,6 @@ export const DashboardPage = () => {
   const [stats, setStats] = useState({ totalRecords: 0, monthlyRecords: 0, totalSpent: 0, monthlySpend: [], categoryBreakdown: [] });
   const [upcomingCount, setUpcomingCount] = useState(0);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-
   useEffect(() => { fetchData(); }, []);
 
   const fetchData = async () => {

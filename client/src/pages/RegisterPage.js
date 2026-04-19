@@ -1,30 +1,56 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
+import { useAuth } from '../context/AuthContext';
+
+const INITIAL_FORM = {
+  name: '',
+  email: '',
+  phone: '',
+  city: '',
+  state: '',
+  password: '',
+  confirmPassword: '',
+};
 
 export const RegisterPage = () => {
-  const [formData, setFormData] = useState({
-    email: 'demo@gharseva.in',
-    password: 'demo1234',
-  });
+  const [formData, setFormData] = useState(INITIAL_FORM);
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleChange = (e) =>
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
     setLoading(true);
     try {
-      await login(formData.email, formData.password);
-      toast.success('Welcome back!');
+      await register(
+        formData.name.trim(),
+        formData.email.trim(),
+        formData.phone.trim(),
+        formData.password,
+        formData.city.trim(),
+        formData.state.trim()
+      );
+      toast.success('Account created successfully');
       navigate('/');
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Login failed. Please try again.');
+      toast.error(err.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -32,8 +58,6 @@ export const RegisterPage = () => {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', fontFamily: "'DM Sans', 'Segoe UI', sans-serif" }}>
-
-      {/* LEFT PANEL */}
       <motion.div
         initial={{ opacity: 0, x: -30 }}
         animate={{ opacity: 1, x: 0 }}
@@ -48,13 +72,20 @@ export const RegisterPage = () => {
           position: 'relative',
           overflow: 'hidden',
         }}
+        className="auth-panel-left"
       >
-        <div style={{
-          position: 'absolute', bottom: -80, left: -80,
-          width: 360, height: 360,
-          background: 'radial-gradient(circle, rgba(196,127,78,0.18) 0%, transparent 70%)',
-          borderRadius: '50%', pointerEvents: 'none',
-        }} />
+        <div
+          style={{
+            position: 'absolute',
+            top: -90,
+            right: -90,
+            width: 320,
+            height: 320,
+            background: 'radial-gradient(circle, rgba(196,127,78,0.2) 0%, transparent 70%)',
+            borderRadius: '50%',
+            pointerEvents: 'none',
+          }}
+        />
 
         <div>
           <span style={{ fontSize: 22, fontWeight: 700, color: '#f5ede4', letterSpacing: '-0.3px' }}>
@@ -76,41 +107,30 @@ export const RegisterPage = () => {
               marginBottom: 32,
             }}
           >
-            Every home has a{' '}
-            <em style={{ color: '#c47f4e', fontStyle: 'italic' }}>rhythm.</em>
-            <br />We help you keep it.
+            Build a smarter memory
+            <br />
+            for your <em style={{ color: '#c47f4e', fontStyle: 'italic' }}>home.</em>
           </motion.h1>
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.5 }}
-            style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
-          >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {[
-              'Track AC, RO, plumbing & more across every property',
-              'Never miss a due-date with a clear monthly view',
-              'Your trusted vendors, costs & warranties — in one place',
-            ].map((text, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-                <span style={{ color: '#c47f4e', fontSize: 18, lineHeight: 1.55, flexShrink: 0 }}>—</span>
+              'Track every service, repair, and maintenance cycle',
+              'Know what is due next before it becomes a costly problem',
+              'Keep vendors, costs, and property records in one calm workspace',
+            ].map((text) => (
+              <div key={text} style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                <span style={{ color: '#c47f4e', fontSize: 18, lineHeight: 1.55, flexShrink: 0 }}>-</span>
                 <span style={{ fontSize: 15, color: 'rgba(245,237,228,0.72)', lineHeight: 1.65 }}>{text}</span>
               </div>
             ))}
-          </motion.div>
+          </div>
         </div>
 
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.5 }}
-          style={{ fontSize: 12, color: 'rgba(245,237,228,0.38)', letterSpacing: '0.02em' }}
-        >
+        <p style={{ fontSize: 12, color: 'rgba(245,237,228,0.38)', letterSpacing: '0.02em' }}>
           Built in India · For Indian homes
-        </motion.p>
+        </p>
       </motion.div>
 
-      {/* RIGHT PANEL */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -124,66 +144,59 @@ export const RegisterPage = () => {
           padding: '48px 40px',
         }}
       >
-        <div style={{ width: '100%', maxWidth: 420 }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25, duration: 0.5 }}
-          >
-            <h2 style={{
-              fontFamily: "'Playfair Display', 'Georgia', serif",
-              fontSize: 38,
-              fontWeight: 700,
-              color: '#1c2b27',
-              marginBottom: 8,
-              letterSpacing: '-0.5px',
-            }}>
-              Welcome back
+        <div style={{ width: '100%', maxWidth: 520 }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.5 }}>
+            <h2
+              style={{
+                fontFamily: "'Playfair Display', 'Georgia', serif",
+                fontSize: 38,
+                fontWeight: 700,
+                color: '#1c2b27',
+                marginBottom: 8,
+                letterSpacing: '-0.5px',
+              }}
+            >
+              Create account
             </h2>
-            <p style={{ fontSize: 15, color: '#6b7565', marginBottom: 40, lineHeight: 1.5 }}>
-              Sign in to your GharSeva account.
+            <p style={{ fontSize: 15, color: '#6b7565', marginBottom: 32, lineHeight: 1.5 }}>
+              Start tracking maintenance before small tasks become expensive repairs.
             </p>
 
-            <form onSubmit={handleSubmit}>
-              <motion.div
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.35, duration: 0.4 }}
-                style={{ marginBottom: 20 }}
-              >
-                <label style={labelStyle}>EMAIL</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  placeholder="you@example.com"
-                  style={inputStyle}
-                  onFocus={e => { e.target.style.borderColor = '#1c2b27'; e.target.style.boxShadow = '0 0 0 3px rgba(28,43,39,0.10)'; }}
-                  onBlur={e => { e.target.style.borderColor = '#d8d1c7'; e.target.style.boxShadow = 'none'; }}
-                />
-              </motion.div>
+            <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 16 }}>
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={labelStyle}>FULL NAME</label>
+                <input name="name" value={formData.name} onChange={handleChange} required placeholder="Praasadd" style={inputStyle} />
+              </div>
 
-              <motion.div
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.42, duration: 0.4 }}
-                style={{ marginBottom: 32 }}
-              >
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={labelStyle}>EMAIL</label>
+                <input type="email" name="email" value={formData.email} onChange={handleChange} required placeholder="you@example.com" style={inputStyle} />
+              </div>
+
+              <div>
+                <label style={labelStyle}>PHONE</label>
+                <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required placeholder="9876543210" style={inputStyle} />
+              </div>
+
+              <div>
+                <label style={labelStyle}>STATE</label>
+                <input name="state" value={formData.state} onChange={handleChange} placeholder="Maharashtra" style={inputStyle} />
+              </div>
+
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={labelStyle}>CITY</label>
+                <input name="city" value={formData.city} onChange={handleChange} placeholder="Pune" style={inputStyle} />
+              </div>
+
+              <div>
                 <label style={labelStyle}>PASSWORD</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  placeholder="••••••••"
-                  style={inputStyle}
-                  onFocus={e => { e.target.style.borderColor = '#1c2b27'; e.target.style.boxShadow = '0 0 0 3px rgba(28,43,39,0.10)'; }}
-                  onBlur={e => { e.target.style.borderColor = '#d8d1c7'; e.target.style.boxShadow = 'none'; }}
-                />
-              </motion.div>
+                <input type="password" name="password" value={formData.password} onChange={handleChange} required minLength={6} placeholder="At least 6 characters" style={inputStyle} />
+              </div>
+
+              <div>
+                <label style={labelStyle}>CONFIRM PASSWORD</label>
+                <input type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required minLength={6} placeholder="Repeat password" style={inputStyle} />
+              </div>
 
               <motion.button
                 type="submit"
@@ -191,6 +204,7 @@ export const RegisterPage = () => {
                 whileHover={{ scale: loading ? 1 : 1.015 }}
                 whileTap={{ scale: loading ? 1 : 0.98 }}
                 style={{
+                  gridColumn: '1 / -1',
                   width: '100%',
                   padding: '16px',
                   background: loading ? '#3a5a50' : '#1c2b27',
@@ -203,43 +217,19 @@ export const RegisterPage = () => {
                   transition: 'background 0.2s',
                   letterSpacing: '0.01em',
                   fontFamily: 'inherit',
+                  marginTop: 4,
                 }}
               >
-                {loading ? 'Signing in…' : 'Sign in'}
+                {loading ? 'Creating account...' : 'Create account'}
               </motion.button>
             </form>
 
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.55, duration: 0.4 }}
-              style={{ textAlign: 'center', marginTop: 24, fontSize: 14, color: '#6b7565' }}
-            >
-              New here?{' '}
-              <Link
-                to="/register"
-                style={{ color: '#1c2b27', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 3 }}
-              >
-                Create an account
+            <p style={{ textAlign: 'center', marginTop: 24, fontSize: 14, color: '#6b7565' }}>
+              Already have an account?{' '}
+              <Link to="/login" style={{ color: '#1c2b27', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 3 }}>
+                Sign in
               </Link>
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.65, duration: 0.4 }}
-              style={{
-                marginTop: 28,
-                padding: '12px 16px',
-                background: 'rgba(28,43,39,0.07)',
-                borderRadius: 8,
-                fontSize: 12,
-                color: '#6b7565',
-                lineHeight: 1.7,
-              }}
-            >
-              Demo login pre-filled · demo@gharseva.in / demo1234
-            </motion.div>
+            </p>
           </motion.div>
         </div>
       </motion.div>

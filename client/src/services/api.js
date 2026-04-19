@@ -53,4 +53,15 @@ export const vendorAPI = {
   delete:  (id)         => api.delete(`/vendors/${id}`),
 };
 
+export const notificationAPI = {
+  getAll:       ()     => api.get('/notifications'),
+  markAsRead:   (id)   => api.put(`/notifications/${id}/read`),
+  markAllAsRead:()     => api.put('/notifications/read-all'),
+};
+
+// Extend userAPI with notification methods
+userAPI.getNotifications = () => api.get('/notifications');
+userAPI.markNotificationAsRead = (id) => api.put(`/notifications/${id}/read`);
+userAPI.markAllNotificationsAsRead = () => api.put('/notifications/read-all');
+
 export default api;

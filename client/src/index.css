@@ -1,9 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700;1,800&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 * {
   box-sizing: border-box;
 }
@@ -21,53 +17,81 @@ body {
   color: #1c2b27;
 }
 
-/* Custom scrollbar - warm tone */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: #e4ddd4;
-}
-::-webkit-scrollbar-thumb {
-  background: #b5ada5;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #8c857e;
+a,
+button,
+input,
+select,
+textarea {
+  transition: all 0.15s ease;
 }
 
-input:focus, select:focus, textarea:focus {
-  outline: none;
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #c47f4e;
+  outline-offset: 2px;
 }
 
-input::placeholder, textarea::placeholder {
+input::placeholder,
+textarea::placeholder {
   color: #9b8f85;
 }
 
-/* Number input arrows off */
 input[type='number']::-webkit-outer-spin-button,
 input[type='number']::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
 input[type='number'] {
   -moz-appearance: textfield;
 }
 
-/* Date input styling */
 input[type='date']::-webkit-calendar-picker-indicator {
   opacity: 0.5;
   cursor: pointer;
 }
 
-/* Smooth transitions everywhere */
-button, a, input, select, textarea {
-  transition: all 0.15s ease;
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-/* Focus rings */
-button:focus-visible, a:focus-visible {
-  outline: 2px solid #c47f4e;
-  outline-offset: 2px;
+::-webkit-scrollbar-track {
+  background: #e4ddd4;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #b5ada5;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8c857e;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 900px) {
+  .desktop-sidebar {
+    display: none !important;
+  }
+
+  .mobile-topbar {
+    display: flex !important;
+  }
+
+  .auth-panel-left {
+    display: none !important;
+  }
 }

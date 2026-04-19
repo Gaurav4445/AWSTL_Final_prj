@@ -1,32 +1,74 @@
 const Task = require('../models/Task');
 
+const normalizeTaskPayload = (payload = {}, existingTask = null) => {
+  const normalized = { ...payload };
+
+  if (typeof normalized.title === 'string' && !normalized.name) {
+    normalized.name = normalized.title;
+  }
+  delete normalized.title;
+
+  if (Object.prototype.hasOwnProperty.call(normalized, 'dueDate')) {
+    normalized.nextDueDate = normalized.dueDate || null;
+  }
+  delete normalized.dueDate;
+
+  const completed = Object.prototype.hasOwnProperty.call(normalized, 'completed')
+    ? !!normalized.completed
+    : existingTask?.completed;
+
+  if (typeof completed === 'boolean') {
+    normalized.completed = completed;
+    normalized.completedAt = completed ? existingTask?.completedAt || new Date() : null;
+  }
+
+  if (normalized.estimatedCost !== undefined) {
+    normalized.estimatedCost = Number(normalized.estimatedCost) || 0;
+  }
+
+  return normalized;
+};
+
+const serializeTask = (taskDoc) => {
+  const task = taskDoc.toObject ? taskDoc.toObject() : taskDoc;
+  return {
+    ...task,
+    dueDate: task.nextDueDate || null,
+    status: task.completed ? 'Completed' : 'Pending',
+  };
+};
+
 exports.getTasks = async (req, res, next) => {
   try {
-    const tasks = await Task.find({ userId: req.userId }).populate('propertyId', 'name city');
-    res.status(200).json({ success: true, count: tasks.length, data: tasks });
+    const tasks = await Task.find({ userId: req.userId }).populate('propertyId', 'name city').sort({ nextDueDate: 1, createdAt: -1 });
+    res.status(200).json({ success: true, count: tasks.length, data: tasks.map(serializeTask) });
   } catch (err) { next(err); }
 };
 
 exports.getPropertyTasks = async (req, res, next) => {
   try {
-    const tasks = await Task.find({ userId: req.userId, propertyId: req.params.propertyId });
-    res.status(200).json({ success: true, count: tasks.length, data: tasks });
+    const tasks = await Task.find({ userId: req.userId, propertyId: req.params.propertyId }).populate('propertyId', 'name city').sort({ nextDueDate: 1, createdAt: -1 });
+    res.status(200).json({ success: true, count: tasks.length, data: tasks.map(serializeTask) });
   } catch (err) { next(err); }
 };
 
 exports.getTask = async (req, res, next) => {
   try {
-    const task = await Task.findById(req.params.id);
+    const task = await Task.findById(req.params.id).populate('propertyId', 'name city');
     if (!task) return res.status(404).json({ success: false, error: 'Task not found' });
-    res.status(200).json({ success: true, data: task });
+    if (task.userId.toString() !== req.userId)
+      return res.status(403).json({ success: false, error: 'Not authorized' });
+    res.status(200).json({ success: true, data: serializeTask(task) });
   } catch (err) { next(err); }
 };
 
 exports.createTask = async (req, res, next) => {
   try {
-    req.body.userId = req.userId;
-    const task = await Task.create(req.body);
-    res.status(201).json({ success: true, data: task });
+    const payload = normalizeTaskPayload(req.body);
+    payload.userId = req.userId;
+    const task = await Task.create(payload);
+    await task.populate('propertyId', 'name city');
+    res.status(201).json({ success: true, data: serializeTask(task) });
   } catch (err) { next(err); }
 };
 
@@ -36,8 +78,10 @@ exports.updateTask = async (req, res, next) => {
     if (!task) return res.status(404).json({ success: false, error: 'Task not found' });
     if (task.userId.toString() !== req.userId)
       return res.status(403).json({ success: false, error: 'Not authorized' });
-    task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    res.status(200).json({ success: true, data: task });
+
+    const payload = normalizeTaskPayload(req.body, task);
+    task = await Task.findByIdAndUpdate(req.params.id, payload, { new: true, runValidators: true }).populate('propertyId', 'name city');
+    res.status(200).json({ success: true, data: serializeTask(task) });
   } catch (err) { next(err); }
 };
 

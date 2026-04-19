@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Trash2, Edit2, ArrowRight, Home, Building2, Maximize2 } from 'lucide-react';
+import { MapPin, Trash2, Edit2, ArrowRight, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 

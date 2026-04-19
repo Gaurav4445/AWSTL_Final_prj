@@ -17,7 +17,7 @@ const SPEC_COLORS = {
   'General Handyman': '#6c757d',
 };
 
-export const CategorySelect = ({ value, onChange, categories = [], label }) => {
+export const CategorySelect = ({ value, onChange, categories = [], name = 'category' }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const selectedColor = SPEC_COLORS[value] || '#6b7565';
@@ -91,7 +91,7 @@ export const CategorySelect = ({ value, onChange, categories = [], label }) => {
                   key={category}
                   type="button"
                   onClick={() => {
-                    onChange({ target: { value: category } });
+                    onChange({ target: { name, value: category } });
                     setIsOpen(false);
                   }}
                   initial={{ opacity: 0, x: -10 }}
