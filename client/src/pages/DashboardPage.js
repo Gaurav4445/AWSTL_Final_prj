@@ -231,7 +231,7 @@ export const DashboardPage = () => {
                     <span style={{
                       minWidth: 54,
                       borderRadius: 999,
-                      background: emailRemindersEnabled ? '#166534' : '#0cdb28',
+                      background: emailRemindersEnabled ? '#166534' : '#0eeb8f',
                       color: '#fff',
                       padding: '6px 10px',
                       fontSize: 11,
