@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const MaintenanceRecordSchema = new mongoose.Schema({
   userId:     { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   propertyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Property', required: true },
+  applianceId:{ type: mongoose.Schema.Types.ObjectId, ref: 'Appliance', required: false },
   taskId:     { type: mongoose.Schema.Types.ObjectId, ref: 'Task', required: false },
   vendorId:   { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: false },
   serviceDate:{ type: Date, required: true },
@@ -20,6 +21,11 @@ const MaintenanceRecordSchema = new mongoose.Schema({
     default: 'Cash',
   },
   upiTransactionId: { type: String, default: '' },
+  invoiceAttachment: {
+    fileName: { type: String, default: '' },
+    dataUrl: { type: String, default: '' },
+    uploadedAt: { type: Date, default: null },
+  },
   status: { type: String, enum: ['Completed','Pending','Cancelled'], default: 'Completed' },
   warrantyMonths: { type: Number, default: 0 },
   rating: { type: Number, min: 1, max: 5 },

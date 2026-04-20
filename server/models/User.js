@@ -8,6 +8,10 @@ const UserSchema = new mongoose.Schema({
   password: { type: String, required: true, minlength: 6, select: false },
   city:  { type: String, default: '' },
   state: { type: String, default: '' },
+  notificationPreferences: {
+    emailReminders: { type: Boolean, default: true },
+    inAppReminders: { type: Boolean, default: true },
+  },
 }, { timestamps: true });
 
 UserSchema.pre('save', async function (next) {

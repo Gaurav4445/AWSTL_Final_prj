@@ -9,6 +9,7 @@ import { Skeleton } from '../components/ui/Skeleton';
 import { PageTransition } from '../components/Animations';
 import { vendorAPI } from '../services/api';
 import { toast } from 'sonner';
+import { vendorImageForCategory } from '../utils/demoImages';
 
 
 const EMPTY_FORM = { name:'', category:'', phone:'', city:'', rating:5, notes:'' };
@@ -182,6 +183,11 @@ export const VendorsPage = () => {
                     viewport={{ once: true }} transition={{ delay: idx * 0.08, duration: 0.35 }}>
                     <motion.div whileHover={{ y: -4, boxShadow: '0 12px 32px rgba(0,0,0,0.12)' }} transition={{ duration: 0.2 }}
                       style={{ background: '#fff', borderRadius: 18, border: '1px solid #e4ddd4', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', height: '100%' }}>
+                      <img
+                        src={vendorImageForCategory(vendor.category)}
+                        alt={vendor.category}
+                        style={{ width: '100%', height: 132, objectFit: 'cover', display: 'block', borderBottom: '1px solid #ece5db' }}
+                      />
                       <div style={{ height: 4, background: accent }} />
                       <div style={{ padding: '20px 22px' }}>
                         {/* Header */}

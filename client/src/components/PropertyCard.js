@@ -2,6 +2,7 @@ import React from 'react';
 import { MapPin, Trash2, Edit2, ArrowRight, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { propertyImageForType } from '../utils/demoImages';
 
 const TYPE_ACCENT = {
   'Apartment':        '#457b9d',
@@ -19,6 +20,11 @@ export const PropertyCard = ({ property, onDelete, onEdit }) => {
   return (
     <motion.div whileHover={{ y: -4, boxShadow: '0 12px 32px rgba(0,0,0,0.14)' }} transition={{ duration: 0.2 }}
       style={{ background: '#fff', borderRadius: 18, overflow: 'hidden', border: '1px solid #e4ddd4', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
+      <img
+        src={property.coverImage?.dataUrl || propertyImageForType(property.propertyType)}
+        alt={property.name}
+        style={{ width: '100%', height: 150, objectFit: 'cover', display: 'block', borderBottom: '1px solid #ece5db' }}
+      />
       {/* Top accent bar */}
       <div style={{ height: 4, background: accent }} />
 

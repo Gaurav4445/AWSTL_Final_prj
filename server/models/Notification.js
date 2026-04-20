@@ -4,9 +4,11 @@ const notificationSchema = new mongoose.Schema({
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   title: { type: String, required: true },
   message: { type: String, required: true },
-  type: { type: String, enum: ['task', 'record', 'vendor', 'system'], default: 'system' },
+  type: { type: String, enum: ['task', 'record', 'vendor', 'booking', 'system'], default: 'system' },
   read: { type: Boolean, default: false },
   link: { type: String }, // e.g., "/tasks/123"
+  dedupeKey: { type: String, unique: true, sparse: true },
+  emailSentAt: { type: Date, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Notification', notificationSchema);

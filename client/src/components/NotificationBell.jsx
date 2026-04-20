@@ -1,12 +1,16 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Bell, CheckCheck } from 'lucide-react';
 import { notificationAPI } from '../services/api';
 import { timeAgo } from '../utils/dateUtils';
 
 export default function NotificationBell() {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isCompact, setIsCompact] = useState(typeof window !== 'undefined' ? window.innerWidth < 640 : false);
+  const [alignLeft, setAlignLeft] = useState(true);
   const wrapperRef = useRef(null);
 
   const unreadCount = useMemo(
@@ -19,15 +23,41 @@ export default function NotificationBell() {
   }, []);
 
   useEffect(() => {
+    const updatePanelPlacement = () => {
+      setIsCompact(window.innerWidth < 640);
+      if (!wrapperRef.current) return;
+      const rect = wrapperRef.current.getBoundingClientRect();
+      setAlignLeft(rect.left < window.innerWidth / 2);
+    };
+
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
         setOpen(false);
       }
     };
 
+    updatePanelPlacement();
+    const handleIncomingNotification = () => fetchNotifications();
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    window.addEventListener('resize', updatePanelPlacement);
+    window.addEventListener('gharseva:new-notification', handleIncomingNotification);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('resize', updatePanelPlacement);
+      window.removeEventListener('gharseva:new-notification', handleIncomingNotification);
+    };
   }, []);
+
+  useEffect(() => {
+    if (open) {
+      if (wrapperRef.current) {
+        const rect = wrapperRef.current.getBoundingClientRect();
+        setAlignLeft(rect.left < window.innerWidth / 2);
+      }
+      fetchNotifications();
+    }
+  }, [open]);
 
   const fetchNotifications = async () => {
     try {
@@ -42,12 +72,17 @@ export default function NotificationBell() {
   };
 
   const handleMarkAsRead = async (notification) => {
-    if (notification.read) return;
     try {
-      await notificationAPI.markAsRead(notification._id);
+      if (!notification.read) {
+        await notificationAPI.markAsRead(notification._id);
+      }
       setNotifications((prev) =>
         prev.map((item) => (item._id === notification._id ? { ...item, read: true } : item))
       );
+      if (notification.link) {
+        navigate(notification.link);
+        setOpen(false);
+      }
     } catch {
       // no-op
     }
@@ -75,7 +110,7 @@ export default function NotificationBell() {
       </button>
 
       {open && (
-        <div style={panelStyle}>
+        <div style={getPanelStyle(isCompact, alignLeft)}>
           <div style={panelHeaderStyle}>
             <div>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1c2b27' }}>Notifications</p>
@@ -87,8 +122,7 @@ export default function NotificationBell() {
               </button>
             )}
           </div>
-
-          <div style={{ maxHeight: 320, overflowY: 'auto' }}>
+          <div style={{ maxHeight: isCompact ? 'calc(100vh - 180px)' : 360, overflowY: 'auto' }}>
             {loading ? (
               <div style={emptyStateStyle}>Loading notifications...</div>
             ) : notifications.length === 0 ? (
@@ -153,18 +187,20 @@ const badgeStyle = {
   padding: '0 5px',
 };
 
-const panelStyle = {
-  position: 'absolute',
-  top: 'calc(100% + 10px)',
-  right: 0,
-  width: 320,
+const getPanelStyle = (isCompact, alignLeft) => ({
+  position: isCompact ? 'fixed' : 'absolute',
+  top: isCompact ? 68 : 'calc(100% + 10px)',
+  right: isCompact ? 12 : alignLeft ? 'auto' : 0,
+  left: isCompact ? 12 : alignLeft ? 0 : 'auto',
+  width: isCompact ? 'auto' : 320,
+  maxWidth: isCompact ? 'calc(100vw - 24px)' : 'min(360px, calc(100vw - 32px))',
   borderRadius: 16,
   background: '#ffffff',
   border: '1px solid #e4ddd4',
   boxShadow: '0 18px 42px rgba(28,43,39,0.18)',
   overflow: 'hidden',
   zIndex: 120,
-};
+});
 
 const panelHeaderStyle = {
   padding: '16px 18px',

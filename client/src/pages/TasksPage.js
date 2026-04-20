@@ -9,6 +9,7 @@ import { Skeleton } from '../components/ui/Skeleton';
 import { PageTransition } from '../components/Animations';
 import { propertyAPI, taskAPI } from '../services/api';
 import { toast } from 'sonner';
+import { propertyImageForType } from '../utils/demoImages';
 
 const EMPTY_FORM = {
   name: '',
@@ -234,6 +235,11 @@ export const TasksPage = () => {
                 return (
                   <motion.div key={task._id} initial={{ opacity: 0, x: -16 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.04, duration: 0.3 }}>
                     <div style={{ background: task.completed ? '#fafaf8' : '#fff', borderRadius: 14, border: `1px solid ${task.completed ? '#e4ddd4' : isOverdue ? '#fecaca' : '#e4ddd4'}`, padding: '16px 20px', display: 'flex', alignItems: 'flex-start', gap: 14 }}>
+                      <img
+                        src={propertyImageForType(task.propertyId?.propertyType || 'Apartment')}
+                        alt={task.propertyId?.name || 'Property'}
+                        style={{ width: 88, height: 88, objectFit: 'cover', borderRadius: 12, flexShrink: 0, border: '1px solid #ece5db' }}
+                      />
                       <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} onClick={() => handleToggle(task)} style={{ width: 24, height: 24, borderRadius: '50%', border: `2px solid ${task.completed ? '#16a34a' : '#d8d1c7'}`, background: task.completed ? '#16a34a' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, marginTop: 2 }}>
                         {task.completed && <Check size={13} color="#fff" />}
                       </motion.button>

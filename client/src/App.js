@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { DashboardPage } from './pages/DashboardPage';
+import { BookingsPage } from './pages/BookingsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { LoginPage } from './pages/LoginPage';
 import { PropertiesPage } from './pages/PropertiesPage';
@@ -31,6 +32,7 @@ const SocketBridge = () => {
     socket.emit('joinUserRoom', user._id || user.id);
 
     const handleNotification = (notification) => {
+      window.dispatchEvent(new CustomEvent('gharseva:new-notification', { detail: notification }));
       toast.info(notification.title || 'New notification', {
         description: notification.message,
       });
@@ -85,6 +87,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <TasksPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/bookings"
+          element={
+            <ProtectedRoute>
+              <BookingsPage />
             </ProtectedRoute>
           }
         />

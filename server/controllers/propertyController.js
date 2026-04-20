@@ -1,6 +1,8 @@
 const Property = require('../models/Property');
 const Task = require('../models/Task');
 const MaintenanceRecord = require('../models/MaintenanceRecord');
+const Appliance = require('../models/Appliance');
+const { ServiceBooking } = require('../models/ServiceBooking');
 
 exports.getProperties = async (req, res, next) => {
   try {
@@ -45,9 +47,11 @@ exports.deleteProperty = async (req, res, next) => {
     if (property.userId.toString() !== req.userId)
       return res.status(403).json({ success: false, error: 'Not authorized' });
     
-    // Delete associated tasks and records
+    // Delete associated tasks, appliances, records, and service bookings
     await Task.deleteMany({ propertyId: req.params.id });
+    await Appliance.deleteMany({ propertyId: req.params.id });
     await MaintenanceRecord.deleteMany({ propertyId: req.params.id });
+    await ServiceBooking.deleteMany({ propertyId: req.params.id });
     
     await Property.findByIdAndDelete(req.params.id);
     res.status(200).json({ success: true, data: {} });

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Building2, ClipboardList, History, Home, LogOut, Menu, Users, X } from 'lucide-react';
+import { Building2, CalendarClock, ClipboardList, History, Home, LogOut, Menu, Users, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from './NotificationBell';
@@ -9,6 +9,7 @@ const navLinks = [
   { to: '/', label: 'Dashboard', icon: Home },
   { to: '/properties', label: 'Properties', icon: Building2 },
   { to: '/tasks', label: 'Tasks', icon: ClipboardList },
+  { to: '/bookings', label: 'Bookings', icon: CalendarClock },
   { to: '/history', label: 'History', icon: History },
   { to: '/vendors', label: 'Vendors', icon: Users },
 ];

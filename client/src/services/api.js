@@ -37,6 +37,14 @@ export const taskAPI = {
   delete:         (id)         => api.delete(`/tasks/${id}`),
 };
 
+export const bookingAPI = {
+  getAll:         (propertyId)   => api.get('/bookings', { params: propertyId ? { propertyId } : {} }),
+  getByProperty:  (propertyId)   => api.get(`/bookings/property/${propertyId}`),
+  create:         (data)         => api.post('/bookings', data),
+  update:         (id, data)     => api.put(`/bookings/${id}`, data),
+  delete:         (id)           => api.delete(`/bookings/${id}`),
+};
+
 export const recordAPI = {
   getAll:           ()           => api.get('/records'),
   getByProperty:    (propId)     => api.get(`/records/property/${propId}`),
@@ -51,6 +59,14 @@ export const vendorAPI = {
   create:  (data)       => api.post('/vendors', data),
   update:  (id, data)   => api.put(`/vendors/${id}`, data),
   delete:  (id)         => api.delete(`/vendors/${id}`),
+};
+
+export const applianceAPI = {
+  getAll:        (propertyId)   => api.get('/appliances', { params: propertyId ? { propertyId } : {} }),
+  getByProperty: (propertyId)   => api.get(`/appliances/property/${propertyId}`),
+  create:        (data)         => api.post('/appliances', data),
+  update:        (id, data)     => api.put(`/appliances/${id}`, data),
+  delete:        (id)           => api.delete(`/appliances/${id}`),
 };
 
 export const notificationAPI = {
